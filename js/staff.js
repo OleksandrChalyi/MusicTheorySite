@@ -15,7 +15,7 @@
      c/4=Text     custom label under the note ("_" = no label)
    ========================================================== */
 
-const STAFF_COLORS = { accent: '#d4105f', ok: '#0e9c88', bad: '#e0600c' };
+const STAFF_COLORS = { accent: '#a8141c', ok: '#2c7a73', bad: '#c0631a' };
 const VEX_ACC = { 1: '#', '-1': 'b', 2: '##', '-2': 'bb' };
 const BEATS = { w: 4, h: 2, q: 1, 8: 0.5, 16: 0.25 };
 

@@ -30,14 +30,14 @@
       <svg class="hero-art" viewBox="0 0 560 520" role="img" aria-label="Гитара на фоне закатного солнца, вокруг летят ноты">
         <defs>
           <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#ffd23f"/>
-            <stop offset="0.35" stop-color="#ff7a1a"/>
-            <stop offset="0.7" stop-color="#ff2e7e"/>
-            <stop offset="1" stop-color="#5a1a86"/>
+            <stop offset="0" stop-color="#d9a04a"/>
+            <stop offset="0.3" stop-color="#c8621f"/>
+            <stop offset="0.62" stop-color="#a3141b"/>
+            <stop offset="1" stop-color="#2a0507"/>
           </linearGradient>
           <linearGradient id="body" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#2a1840"/>
-            <stop offset="1" stop-color="#0b0716"/>
+            <stop offset="0" stop-color="#2a1d18"/>
+            <stop offset="1" stop-color="#070505"/>
           </linearGradient>
           <mask id="stripes">
             <rect width="560" height="520" fill="#fff"/>
@@ -49,7 +49,7 @@
             <rect y="426" width="560" height="20" fill="#000"/>
           </mask>
           <pattern id="dots" width="10" height="10" patternUnits="userSpaceOnUse">
-            <circle cx="5" cy="5" r="2.1" fill="#2de2c8"/>
+            <circle cx="5" cy="5" r="2.1" fill="#5aa7a0"/>
           </pattern>
           <filter id="paint" x="-10%" y="-40%" width="120%" height="180%">
             <feTurbulence type="fractalNoise" baseFrequency="0.02 0.08" numOctaves="4" seed="11"/>
@@ -57,7 +57,7 @@
           </filter>
           <filter id="rim" x="-30%" y="-30%" width="160%" height="160%">
             <feMorphology in="SourceAlpha" operator="dilate" radius="3" result="fat"/>
-            <feFlood flood-color="#2de2c8"/>
+            <feFlood flood-color="#5aa7a0"/>
             <feComposite in2="fat" operator="in" result="edge"/>
             <feGaussianBlur in="edge" stdDeviation="7" result="glow"/>
             <feMerge><feMergeNode in="glow"/><feMergeNode in="edge"/><feMergeNode in="SourceGraphic"/></feMerge>
@@ -74,12 +74,12 @@
         <circle cx="300" cy="250" r="200" fill="url(#sun)" mask="url(#stripes)"/>
 
         <!-- brush strokes -->
-        <path d="M30 445 C 170 395 330 470 530 400" stroke="#2de2c8" stroke-width="30" fill="none" stroke-linecap="round" filter="url(#paint)" opacity="0.9"/>
-        <path d="M330 52 C 400 40 470 70 545 112" stroke="#ff2e7e" stroke-width="14" fill="none" stroke-linecap="round" filter="url(#paint)"/>
-        <path d="M18 250 C 40 210 70 190 110 182" stroke="#ffd23f" stroke-width="8" fill="none" stroke-linecap="round" filter="url(#paint)" opacity="0.85"/>
+        <path d="M30 445 C 170 395 330 470 530 400" stroke="#5aa7a0" stroke-width="30" fill="none" stroke-linecap="round" filter="url(#paint)" opacity="0.9"/>
+        <path d="M330 52 C 400 40 470 70 545 112" stroke="#c8202a" stroke-width="14" fill="none" stroke-linecap="round" filter="url(#paint)"/>
+        <path d="M18 250 C 40 210 70 190 110 182" stroke="#cfae62" stroke-width="8" fill="none" stroke-linecap="round" filter="url(#paint)" opacity="0.85"/>
 
         <!-- flowing staff lines -->
-        <g stroke="#f3ead8" stroke-width="1.6" fill="none" opacity="0.55">
+        <g stroke="#e6dbc6" stroke-width="1.6" fill="none" opacity="0.55">
           <path d="M-20 150 C 150 90 350 230 600 140"/>
           <path d="M-20 162 C 150 102 350 242 600 152"/>
           <path d="M-20 174 C 150 114 350 254 600 164"/>
@@ -89,23 +89,23 @@
 
         <!-- guitar silhouette with neon rim light -->
         <g transform="translate(300 300) rotate(-32)" filter="url(#rim)">
-          <path d="M-24 -410 L24 -410 L16 -340 L-16 -340 Z" fill="#160d26"/>
-          <g fill="#f3ead8"><circle cx="-29" cy="-398" r="5"/><circle cx="-27" cy="-376" r="5"/><circle cx="-25" cy="-354" r="5"/>
+          <path d="M-24 -410 L24 -410 L16 -340 L-16 -340 Z" fill="#110c0a"/>
+          <g fill="#e6dbc6"><circle cx="-29" cy="-398" r="5"/><circle cx="-27" cy="-376" r="5"/><circle cx="-25" cy="-354" r="5"/>
             <circle cx="29" cy="-398" r="5"/><circle cx="27" cy="-376" r="5"/><circle cx="25" cy="-354" r="5"/></g>
-          <rect x="-14" y="-342" width="28" height="270" fill="#160d26"/>
+          <rect x="-14" y="-342" width="28" height="270" fill="#110c0a"/>
           <circle cx="0" cy="-30" r="80" fill="url(#body)"/>
           <circle cx="0" cy="92" r="110" fill="url(#body)"/>
-          <g stroke="#7d6a8e" stroke-width="2">
+          <g stroke="#6d5e54" stroke-width="2">
             <line x1="-14" y1="-330" x2="14" y2="-330"/><line x1="-14" y1="-304" x2="14" y2="-304"/>
             <line x1="-14" y1="-280" x2="14" y2="-280"/><line x1="-14" y1="-258" x2="14" y2="-258"/>
             <line x1="-14" y1="-238" x2="14" y2="-238"/><line x1="-14" y1="-220" x2="14" y2="-220"/>
             <line x1="-14" y1="-203" x2="14" y2="-203"/><line x1="-14" y1="-187" x2="14" y2="-187"/>
             <line x1="-14" y1="-172" x2="14" y2="-172"/><line x1="-14" y1="-158" x2="14" y2="-158"/>
           </g>
-          <circle cx="0" cy="12" r="32" fill="#07040e" stroke="#ff2e7e" stroke-width="5"/>
-          <circle cx="0" cy="92" r="98" fill="none" stroke="#ff7a1a" stroke-width="6" stroke-dasharray="130 620" stroke-dashoffset="-330" opacity="0.85"/>
-          <rect x="-34" y="128" width="68" height="12" rx="3" fill="#3a2550"/>
-          <g stroke="#f3ead8" stroke-width="0.9" opacity="0.8">
+          <circle cx="0" cy="12" r="32" fill="#050303" stroke="#c8202a" stroke-width="5"/>
+          <circle cx="0" cy="92" r="98" fill="none" stroke="#de8a2c" stroke-width="6" stroke-dasharray="130 620" stroke-dashoffset="-330" opacity="0.85"/>
+          <rect x="-34" y="128" width="68" height="12" rx="3" fill="#33251e"/>
+          <g stroke="#e6dbc6" stroke-width="0.9" opacity="0.8">
             <line x1="-9" y1="-405" x2="-9" y2="134"/><line x1="-5.4" y1="-405" x2="-5.4" y2="134"/>
             <line x1="-1.8" y1="-405" x2="-1.8" y2="134"/><line x1="1.8" y1="-405" x2="1.8" y2="134"/>
             <line x1="5.4" y1="-405" x2="5.4" y2="134"/><line x1="9" y1="-405" x2="9" y2="134"/>
@@ -113,18 +113,18 @@
         </g>
 
         <!-- flying notes -->
-        <use href="#eighth" x="456" y="150" width="50" height="72" class="float" style="color:#2de2c8"/>
-        <use href="#eighth" x="60" y="300" width="44" height="64" class="float d2" style="color:#f3ead8"/>
-        <use href="#eighth" x="488" y="270" width="40" height="58" class="float d3" style="color:#ffd23f"/>
-        <use href="#eighth" x="128" y="410" width="52" height="75" class="float d3" style="color:#ff2e7e"/>
-        <use href="#eighth" x="190" y="40" width="34" height="50" class="float" style="color:#f3ead8"/>
+        <use href="#eighth" x="456" y="150" width="50" height="72" class="float" style="color:#5aa7a0"/>
+        <use href="#eighth" x="60" y="300" width="44" height="64" class="float d2" style="color:#e6dbc6"/>
+        <use href="#eighth" x="488" y="270" width="40" height="58" class="float d3" style="color:#cfae62"/>
+        <use href="#eighth" x="128" y="410" width="52" height="75" class="float d3" style="color:#c8202a"/>
+        <use href="#eighth" x="190" y="40" width="34" height="50" class="float" style="color:#e6dbc6"/>
 
         <!-- splatter -->
         <g>
-          <circle cx="470" cy="60" r="7" fill="#ff2e7e"/><circle cx="488" cy="44" r="3" fill="#ff2e7e"/><circle cx="455" cy="38" r="2.5" fill="#ff2e7e"/>
-          <circle cx="66" cy="470" r="6" fill="#ff7a1a"/><circle cx="48" cy="486" r="3" fill="#ff7a1a"/><circle cx="88" cy="492" r="2" fill="#ff7a1a"/>
-          <circle cx="530" cy="350" r="4" fill="#2de2c8"/><circle cx="545" cy="330" r="2" fill="#2de2c8"/>
-          <circle cx="250" cy="480" r="3" fill="#f3ead8"/><circle cx="34" cy="80" r="4" fill="#ffd23f"/>
+          <circle cx="470" cy="60" r="7" fill="#c8202a"/><circle cx="488" cy="44" r="3" fill="#c8202a"/><circle cx="455" cy="38" r="2.5" fill="#c8202a"/>
+          <circle cx="66" cy="470" r="6" fill="#de8a2c"/><circle cx="48" cy="486" r="3" fill="#de8a2c"/><circle cx="88" cy="492" r="2" fill="#de8a2c"/>
+          <circle cx="530" cy="350" r="4" fill="#5aa7a0"/><circle cx="545" cy="330" r="2" fill="#5aa7a0"/>
+          <circle cx="250" cy="480" r="3" fill="#e6dbc6"/><circle cx="34" cy="80" r="4" fill="#cfae62"/>
         </g>
       </svg>
     </section>
