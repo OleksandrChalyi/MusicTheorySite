@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Rubik:wght@400;500;700&display=swap">
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/style.css?v=202611092026">
 </head>
 <body data-root="../" data-section="games" data-game="guess-note">
   <main class="page">
@@ -16,19 +16,6 @@
       <h1>Угадай ноту</h1>
       <div class="stats" id="stats"></div>
     </div>
-
-    <details class="settings">
-      <summary>⚙ Настройки</summary>
-      <div class="settings-body">
-        <label class="setting">Лады
-          <div class="seg" data-key="maxFret" data-num><button data-val="4">0–4</button><button data-val="7">0–7</button><button data-val="12">0–12</button></div>
-        </label>
-        <button class="toggle" data-key="natural">Только без диезов</button>
-        <button class="toggle" data-key="heat">Карта ошибок</button>
-      </div>
-    </details>
-
-    <div class="mastery" id="mastery"></div>
 
     <section class="stage" id="play">
       <div class="prompt">
@@ -41,17 +28,29 @@
     </section>
     <section class="stage credits" id="results" hidden></section>
 
+    <div class="mastery" id="mastery"></div>
+    <details class="settings">
+      <summary>⚙ Настройки</summary>
+      <div class="settings-body">
+        <label class="setting">Лады
+          <div class="seg" data-key="maxFret" data-num><button data-val="4">0–4</button><button data-val="7">0–7</button><button data-val="12">0–12</button></div>
+        </label>
+        <button class="toggle" data-key="natural">Только без диезов</button>
+        <button class="toggle" data-key="heat">Карта ошибок</button>
+      </div>
+    </details>
+
     <div class="game-foot">
       <span>Ноты, в которых ошибаешься, выпадают чаще. Не помнишь правила — <a href="../theory/fretboard.html">урок «Ноты на грифе»</a>.</span>
       <button id="reset">Сбросить прогресс игры</button>
     </div>
   </main>
 
-  <script src="../js/core.js"></script>
-  <script src="../js/posters.js"></script>
-  <script src="../js/layout.js"></script>
-  <script src="../js/fretboard.js"></script>
-  <script src="../js/game.js"></script>
+  <script src="../js/core.js?v=202611092026"></script>
+  <script src="../js/posters.js?v=202611092026"></script>
+  <script src="../js/layout.js?v=202611092026"></script>
+  <script src="../js/fretboard.js?v=202611092026"></script>
+  <script src="../js/game.js?v=202611092026"></script>
   <script>
     const game = { pos: null, done: false, ok: false, picked: null, rec: null };
 
@@ -74,7 +73,7 @@
       const mark = game.done
         ? { s: g.s, f: g.f, text: pcName(g.pc), kind: game.ok ? 'ok' : 'bad' }
         : { s: g.s, f: g.f, text: '?', kind: 'target' };
-      $('#board').innerHTML = drawFretboard({ marks: [mark], maxFret: settings.maxFret, heat: settings.heat });
+      $('#board').innerHTML = drawFretboard({ marks: [mark], maxFret: settings.maxFret, heat: settings.heat, crop: true });
 
       const pcs = settings.natural ? NATURAL_PCS : [...Array(12).keys()];
       const options = pcs.map(pc => ({ value: pc, label: pcName(pc), alt: altPcName(pc), sharp: !NATURAL_PCS.includes(pc) }));
@@ -107,9 +106,6 @@
       if (e.target.closest('[data-next]')) session.next();
     });
     $('#replay').addEventListener('click', () => pluck(OPEN_STRINGS[game.pos.s] + game.pos.f));
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Enter' && game.done && !game.ok && !session.finished && !e.target.closest('button')) session.next();
-    });
     document.addEventListener('settingschange', e => {
       if (['maxFret', 'natural'].includes(e.detail.key)) session.start();
       else if (!$('#play').hidden) render();

@@ -777,3 +777,46 @@ tr.clickable[aria-selected="true"] td.muted { color: inherit; opacity: 0.75; }
 [data-film="metropolis"] .session-notes { background: #0b0906; outline: 1px solid #d4a64a; outline-offset: -1px; }
 
 @media (max-width: 700px) { .credits-bottom { grid-template-columns: 1fr; } }
+
+/* ---------- game layout: the game fits the screen ---------- */
+.poster--game { min-height: 0; padding: 18px 24px 20px; margin-bottom: 14px; }
+.poster--game h1 { padding-top: 24px; font-size: clamp(30px, 5vw, 50px); }
+.poster--game .tagline { margin-top: 8px; }
+.poster--game ~ .game-head { display: none; }          /* title lives in the poster, score in the game */
+.page .stage { scroll-margin-top: 64px; margin-top: 0; gap: 14px; padding: 20px 22px; }
+.stage .question { font-size: clamp(24px, 4vw, 34px); }
+
+.stage-top { display: flex; align-items: flex-end; gap: 16px; }
+.stage-top .rounds { flex: 1; min-width: 0; }
+.stage-top .stats { flex: none; gap: 6px; }
+.stage-top .stat { min-width: 66px; padding: 4px 10px 5px; }
+.stage-top .stat b { font-size: 20px; }
+.stage-top .stat small { font-size: 10px; }
+
+.board.cropped { min-width: 0; margin: 0 auto; }
+
+/* Start card: shown before a session, the clock starts on "Старт" */
+.start-card { display: none; }
+.stage.waiting > :not(.stage-top):not(.start-card) { display: none; }
+.stage.waiting .start-card {
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px;
+  padding: 26px 10px 18px;
+}
+.start-card h2 { margin: 4px 0 2px; font-size: clamp(30px, 5vw, 44px); }
+.start-card ul { list-style: none; margin: 0 0 8px; padding: 0; display: flex; flex-direction: column; gap: 4px; color: var(--muted); font-size: 15px; }
+.start-card .next-btn { font-size: 22px; padding: 10px 40px; }
+.start-card small { color: var(--muted); font-size: 13px; }
+
+.answer { position: relative; }
+.answer kbd { position: absolute; top: 3px; left: 7px; font-family: var(--f-body); font-size: 10px; font-weight: 500; opacity: 0.5; }
+@media (hover: none) { .answer kbd, .start-card .keys-hint { display: none; } }
+
+.page > .mastery { margin-top: 22px; }
+
+@media (max-width: 600px) {
+  .poster--game { padding: 14px 16px 16px; }
+  .poster--game h1 { padding-top: 14px; }
+  .stage-top { flex-direction: column; align-items: stretch; gap: 8px; }
+  .stage-top .stats { width: 100%; }
+  .page .stage { padding: 14px; scroll-margin-top: 8px; }
+}

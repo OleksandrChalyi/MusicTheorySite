@@ -22,23 +22,31 @@ const cellW = f => (f === 0 ? FB.nut - 6 : FB.fretW);
  * opts.marks: [{ s, f, text, kind: 'target'|'ok'|'bad'|'root'|'note' }]
  * opts.maxFret: dim frets above this; opts.activeString: highlight one string;
  * opts.heat: colour cells by past accuracy; opts.clickable: hover cells.
+ * opts.crop: with maxFret, draw only frets 0..maxFret (games: the neck fits any screen).
  */
 function drawFretboard(opts = {}) {
-  const { nut, fretW, top, bottom, width } = FB;
-  let h = `<svg class="board${opts.clickable ? ' clickable' : ''}" viewBox="0 0 ${width} 218" role="img" aria-label="Гитарный гриф, лады 0–12">`;
+  const { nut, fretW, top, bottom } = FB;
+  const crop = opts.crop && opts.maxFret != null && opts.maxFret < 12;
+  const last = crop ? opts.maxFret : 12;                 // last fret drawn
+  const width = crop ? nut + last * fretW + 8 : FB.width;
+  // a cropped neck should not be blown up: at most ~1.5× its natural size
+  const style = crop ? ` style="max-width:${Math.round(width * 1.5)}px"` : '';
+  let h = `<svg class="board${opts.clickable ? ' clickable' : ''}${crop ? ' cropped' : ''}" viewBox="0 0 ${width} 218"${style} role="img" aria-label="Гитарный гриф, лады 0–${last}">`;
   // Dark area behind the open strings too, so they never sit on a light page.
   h += `<rect class="headstock" x="2" y="${top}" width="${nut - 2}" height="${bottom - top}" rx="3"/>`;
-  h += `<rect class="wood" x="${nut}" y="${top}" width="${12 * fretW}" height="${bottom - top}" rx="3"/>`;
+  h += `<rect class="wood" x="${nut}" y="${top}" width="${last * fretW}" height="${bottom - top}" rx="3"/>`;
 
   // inlays
   const midY = (stringY(2) + stringY(3)) / 2;
-  [3, 5, 7, 9].forEach(f => { h += `<circle class="inlay" cx="${fretCenterX(f)}" cy="${midY}" r="6"/>`; });
-  h += `<circle class="inlay" cx="${fretCenterX(12)}" cy="${(stringY(1) + stringY(2)) / 2}" r="6"/>`;
-  h += `<circle class="inlay" cx="${fretCenterX(12)}" cy="${(stringY(3) + stringY(4)) / 2}" r="6"/>`;
+  [3, 5, 7, 9].filter(f => f <= last).forEach(f => { h += `<circle class="inlay" cx="${fretCenterX(f)}" cy="${midY}" r="6"/>`; });
+  if (last >= 12) {
+    h += `<circle class="inlay" cx="${fretCenterX(12)}" cy="${(stringY(1) + stringY(2)) / 2}" r="6"/>`;
+    h += `<circle class="inlay" cx="${fretCenterX(12)}" cy="${(stringY(3) + stringY(4)) / 2}" r="6"/>`;
+  }
 
-  if (opts.heat) h += heatCells();
+  if (opts.heat) h += heatCells(last);
 
-  for (let i = 1; i <= 12; i++) {
+  for (let i = 1; i <= last; i++) {
     h += `<line class="fret" x1="${nut + i * fretW}" y1="${top}" x2="${nut + i * fretW}" y2="${bottom}"/>`;
   }
   h += `<rect class="nut" x="${nut - 5}" y="${top}" width="6" height="${bottom - top}"/>`;
@@ -50,13 +58,13 @@ function drawFretboard(opts = {}) {
   }
 
   // Frets outside the practice range fade out (drawn over the strings, so they fade too).
-  if (opts.maxFret != null && opts.maxFret < 12) {
+  if (!crop && opts.maxFret != null && opts.maxFret < 12) {
     const x = nut + opts.maxFret * fretW + 1;
     h += `<rect class="out" x="${x}" y="${top - 2}" width="${width - x}" height="${bottom - top + 4}"/>`;
   }
 
   for (let s = 0; s < 6; s++) {
-    for (let f = 0; f <= 12; f++) {
+    for (let f = 0; f <= last; f++) {
       h += `<rect class="cell" data-s="${s}" data-f="${f}" x="${cellX(f)}" y="${stringY(s) - FB.stringGap / 2}" width="${cellW(f)}" height="${FB.stringGap}"><title>${stringName(s)}, ${fretName(f)}</title></rect>`;
     }
   }
@@ -68,14 +76,14 @@ function drawFretboard(opts = {}) {
          `<text x="${fretCenterX(m.f)}" y="${stringY(m.s) + 0.5}" font-size="${size}">${text}</text></g>`;
   });
 
-  for (let f = 0; f <= 12; f++) h += `<text class="fnum" x="${fretCenterX(f)}" y="212">${f}</text>`;
+  for (let f = 0; f <= last; f++) h += `<text class="fnum" x="${fretCenterX(f)}" y="212">${f}</text>`;
   return h + '</svg>';
 }
 
-function heatCells() {
+function heatCells(last = 12) {
   let h = '';
   for (let s = 0; s < 6; s++) {
-    for (let f = 0; f <= 12; f++) {
+    for (let f = 0; f <= last; f++) {
       const r = store.fret[s + '-' + f];
       if (!r || r[0] + r[1] === 0) continue;
       const acc = r[0] / (r[0] + r[1]);

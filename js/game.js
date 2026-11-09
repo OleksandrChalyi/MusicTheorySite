@@ -15,6 +15,7 @@ const MASTERED = 3;         // fast correct answers in a row to master a note
 
 const fmtTime = ms => (ms / 1000).toFixed(1).replace('.', ',') + ' с';
 
+const ANSWER_KEYS = '1234567890-=';   // keyboard shortcuts for answer buttons 1…12
 const STREAK_BONUS_AT = 5; // from this many correct in a row, points ×1.5
 const STREAK_MILESTONES = [5, 10, 15, 20];
 
@@ -35,10 +36,27 @@ class Session {
     store.unlocked = store.unlocked || {};
     store.history = store.history || {};
     store.bestScore = store.bestScore || {};
-    // Strip of 20 rounds at the top of the play area.
+    // Top of the play area: strip of 20 rounds + score, always visible while playing.
     this.roundsEl = document.createElement('div');
     this.roundsEl.className = 'rounds';
-    this.stage.prepend(this.roundsEl);
+    this.topEl = document.createElement('div');
+    this.topEl.className = 'stage-top';
+    this.topEl.append(this.roundsEl, this.hud);
+    this.stage.prepend(this.topEl);
+    // "Start" card shown before a session: the clock runs only after you press Start.
+    this.introEl = document.createElement('div');
+    this.introEl.className = 'start-card';
+    this.topEl.after(this.introEl);
+
+    document.addEventListener('keydown', e => this.onKey(e));
+    // Time spent in another tab does not count.
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) this.hiddenAt = performance.now();
+      else if (this.hiddenAt != null) {
+        if (this.t0 != null) this.t0 += performance.now() - this.hiddenAt;
+        this.hiddenAt = null;
+      }
+    });
     this.applyLocks();
   }
 
@@ -47,7 +65,8 @@ class Session {
   isMastered(key) { return (this.mastery[key] || 0) >= MASTERED; }
 
   // ---------- flow ----------
-  start(focus = null) {
+  /** New session. With intro: show the Start card first; without: play right away (e.g. "one more"). */
+  start(focus = null, { intro = true } = {}) {
     this.focus = focus && focus.size ? focus : null;
     this.results = [];
     this.over = false;
@@ -56,20 +75,72 @@ class Session {
     this.streak = 0;
     this.bestStreak = 0;
     this.streakEvent = null;
+    this.t0 = null;
     this.stage.hidden = false;
     this.resultsEl.hidden = true;
+    this.renderHud();
+    this.renderProgress();
+    if (intro) {
+      this.waiting = true;
+      this.stage.classList.add('waiting');
+      this.renderIntro();
+      this.renderRounds();
+    } else {
+      this.begin();
+    }
+  }
+
+  /** Start playing: hide the Start card, bring the whole game into view, first question. */
+  begin() {
+    this.waiting = false;
+    this.stage.classList.remove('waiting');
     this.stage.classList.remove('session-start');
-    void this.stage.offsetWidth; // restart the intro animation
+    void this.stage.offsetWidth; // restart the rounds animation
     this.stage.classList.add('session-start');
     clearTimeout(this.introTimer);
     this.introTimer = setTimeout(() => this.stage.classList.remove('session-start'), 1000);
-    this.renderHud();
-    this.renderProgress();
+    this.stage.scrollIntoView({ behavior: 'smooth', block: 'start' });
     this.next();
   }
 
+  renderIntro() {
+    const keys = this.keysHint || 'Цифры 1–7 на клавиатуре — ответ, пробел — дальше.';
+    this.introEl.innerHTML = `
+      <span class="credits-tag">${this.focus ? 'Повтор слабых нот' : 'Новый сеанс'}</span>
+      <h2>${this.length} нот на время</h2>
+      <ul>
+        <li>Быстрее ${FAST_MS / 1000} секунд — больше очков и плюс деление ноте.</li>
+        <li>${STREAK_BONUS_AT} верных подряд — очки ×1,5.</li>
+        <li${this.keysHint ? '' : ' class="keys-hint"'}>${keys}</li>
+      </ul>
+      <button class="next-btn" data-begin>Старт</button>
+      <small>или нажми пробел</small>`;
+    $('[data-begin]', this.introEl).onclick = () => this.begin();
+  }
+
+  /** Keyboard: Space/Enter = start / next; 1–9, 0, -, = pick the n-th answer button. */
+  onKey(e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.target.closest && e.target.closest('input, textarea, select, summary')) return;
+    if (this.stage.hidden) return;
+    const k = e.key;
+    if (this.waiting) {
+      if (k === ' ' || k === 'Enter') { e.preventDefault(); this.begin(); }
+      return;
+    }
+    if (k === ' ' || k === 'Enter') {
+      const nextBtn = $('[data-next]', this.stage);
+      if (nextBtn) { e.preventDefault(); nextBtn.click(); }
+      return;
+    }
+    const idx = ANSWER_KEYS.indexOf(k);
+    if (idx < 0) return;
+    const btn = $$('.answer', this.stage)[idx];
+    if (btn && !btn.disabled) { e.preventDefault(); btn.click(); }
+  }
+
   next() {
-    if (this.over) return; // late auto-advance after the session already ended
+    if (this.over || this.waiting) return; // late auto-advance after the session already ended
     if (this.results.length >= this.length) { this.finish(); return; }
     this.onQuestion(this.focus);
     this.renderRounds();
@@ -284,9 +355,9 @@ class Session {
           <small>Только ноты, где ты ошибся или думал дольше ${FAST_MS / 1000} с. Деления нот растут, в рекорд не идёт.</small>
         </div>` : ''}
       </div>`;
-    $('[data-restart]', el).onclick = () => this.start();
+    $('[data-restart]', el).onclick = () => this.start(null, { intro: false });
     const weakBtn = $('[data-weak]', el);
-    if (weakBtn) weakBtn.onclick = () => this.start(weak);
+    if (weakBtn) weakBtn.onclick = () => this.start(weak, { intro: false });
     el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
@@ -379,14 +450,15 @@ function masteryHtml(rec) {
  * After an answer pass state { correct, picked } to colour them.
  */
 function answerButtons(options, state) {
-  return options.map(o => {
+  return options.map((o, i) => {
     let cls = 'answer' + (o.sharp ? ' sharp' : '');
     if (state) {
       if (o.value === state.correct) cls += ' right';
       else if (o.value === state.picked) cls += ' wrong';
     }
     const altTag = o.alt && settings.dual ? `<span class="alt">${o.alt}</span>` : '';
-    return `<button class="${cls}" data-answer="${o.value}" ${state ? 'disabled' : ''}><span>${o.label}</span>${altTag}</button>`;
+    const key = ANSWER_KEYS[i] ? `<kbd>${ANSWER_KEYS[i]}</kbd>` : '';
+    return `<button class="${cls}" data-answer="${o.value}" ${state ? 'disabled' : ''}>${key}<span>${o.label}</span>${altTag}</button>`;
   }).join('');
 }
 
