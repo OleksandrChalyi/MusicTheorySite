@@ -28,17 +28,20 @@
       </div>
     </details>
 
-    <section class="stage">
+    <div class="mastery" id="mastery"></div>
+
+    <section class="stage" id="play">
       <div class="prompt">
         <div><span class="question" id="question"></span><span class="question-sub" id="where"></span></div>
       </div>
       <div class="scroll-x" id="board"></div>
       <div class="feedback" id="feedback" aria-live="polite"></div>
     </section>
+    <section class="stage credits" id="results" hidden></section>
 
     <div class="game-foot">
-      <span>Статистика общая с игрой «Угадай ноту»: карта ошибок показывает слабые места.</span>
-      <button id="reset">Сбросить статистику грифа</button>
+      <span>Карта ошибок (в настройках) общая с игрой «Угадай ноту» и показывает слабые места.</span>
+      <button id="reset">Сбросить прогресс игры</button>
     </div>
   </main>
 
@@ -48,14 +51,19 @@
   <script src="../js/fretboard.js"></script>
   <script src="../js/game.js"></script>
   <script>
-    const score = new Score('find-note', $('#stats'));
-    const game = { pos: null, done: false, ok: false, clicked: null, warn: '' };
+    const game = { pos: null, done: false, ok: false, clicked: null, warn: '', ms: null };
 
-    function next() {
-      game.pos = nextFretPosition(game.pos);
-      Object.assign(game, { done: false, ok: false, clicked: null, warn: '' });
-      render();
-    }
+    const session = new Session({
+      gameId: 'find-note',
+      hud: $('#stats'), stage: $('#play'), resultsEl: $('#results'), progressEl: $('#mastery'),
+      levels: FRET_LEVELS,
+      onQuestion(focus) {
+        game.pos = nextFretPosition(game.pos, focus);
+        Object.assign(game, { done: false, ok: false, clicked: null, warn: '', ms: null });
+        render();
+        session.ask();
+      },
+    });
 
     function render() {
       const g = game.pos;
@@ -72,10 +80,10 @@
       $('#board').innerHTML = drawFretboard({ marks, maxFret: settings.maxFret, activeString: g.s, heat: settings.heat, clickable: !game.done });
 
       const fb = $('#feedback');
-      if (!game.done) fb.innerHTML = `<span class="hint">${game.warn || 'Нажми лад на подсвеченной струне.'}</span>`;
-      else if (game.ok) fb.innerHTML = verdictHtml(true, `${pcName(g.pc)}${alt(altPcName(g.pc))} на ${g.s + 1}-й струне — все места отмечены.`);
+      if (!game.done) fb.innerHTML = `<span class="hint">${game.warn || 'Нажми лад на подсвеченной струне. Чем быстрее — тем больше очков.'}</span>`;
+      else if (game.ok) fb.innerHTML = verdictHtml(true, `${pcName(g.pc)}${alt(altPcName(g.pc))} на ${g.s + 1}-й струне — все места отмечены.`, false, game.ms);
       else fb.innerHTML = verdictHtml(false,
-        `Там ${pcName(game.clicked.pc)}${alt(altPcName(game.clicked.pc))}. Нужная нота отмечена зелёным.<br><span class="path">${countPath(g.s, g.f)}</span>`, true);
+        `Там ${pcName(game.clicked.pc)}${alt(altPcName(game.clicked.pc))}. Нужная нота отмечена зелёным.<br><span class="path">${countPath(g.s, g.f)}</span>`, true, game.ms);
     }
 
     function clickFret(s, f) {
@@ -89,22 +97,30 @@
       }
       const pc = (OPEN_STRINGS[s] + f) % 12;
       Object.assign(game, { done: true, ok: pc === g.pc, clicked: { s, f, pc } });
-      recordResult(store.fret, g.s + '-' + g.f, game.ok);
-      score.record(game.ok);
+      recordResult(store.fret, fretKey(g), game.ok);
+      game.ms = session.record({
+        key: fretKey(g), ok: game.ok, given: `${pcName(pc)}, ${f === 0 ? 'открытая' : f + ' лад'}`,
+        label: `${pcName(g.pc)} · ${g.s + 1}-я струна`,
+      }).ms;
       render();
-      if (game.ok) { const token = g; setTimeout(() => { if (game.pos === token) next(); }, 900); }
+      if (game.ok) { const token = g; setTimeout(() => { if (game.pos === token) session.next(); }, 900); }
     }
 
-    $('.stage').addEventListener('click', e => {
+    $('#play').addEventListener('click', e => {
       const cell = e.target.closest('.cell');
       if (cell) clickFret(Number(cell.dataset.s), Number(cell.dataset.f));
-      if (e.target.closest('[data-next]')) next();
+      if (e.target.closest('[data-next]')) session.next();
     });
-    document.addEventListener('keydown', e => { if (e.key === 'Enter' && game.done && !game.ok && !e.target.closest('button')) next(); });
-    document.addEventListener('settingschange', e => (['maxFret', 'natural'].includes(e.detail.key) ? next() : render()));
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && game.done && !game.ok && !session.finished && !e.target.closest('button')) session.next();
+    });
+    document.addEventListener('settingschange', e => {
+      if (['maxFret', 'natural'].includes(e.detail.key)) session.start();
+      else if (!$('#play').hidden) render();
+    });
     bindControls($('.settings'));
-    bindReset($('#reset'), () => { store.fret = {}; render(); });
-    next();
+    bindReset($('#reset'), () => { store.fret = {}; session.resetProgress(); });
+    session.start();
   </script>
 </body>
 </html>

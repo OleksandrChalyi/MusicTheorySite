@@ -597,6 +597,56 @@ tr.clickable[aria-selected="true"] td.muted { color: inherit; opacity: 0.75; }
 .game-foot a { text-decoration-color: var(--accent); text-decoration-thickness: 2px; }
 .game-foot button { color: var(--muted); text-decoration: underline; }
 
+/* ---------- sessions: mastery bar, answer time, results ("credits") ---------- */
+[hidden] { display: none !important; }
+
+.mastery { margin-top: 18px; padding: 12px 16px; background: var(--panel); clip-path: var(--cut2); }
+.mastery-text { font-size: 14px; }
+.mastery-text b { font-family: var(--f-disp); font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
+.mastery-bar { height: 8px; margin: 8px 0 6px; background: color-mix(in srgb, var(--text) 15%, transparent); }
+.mastery-bar span { display: block; height: 100%; background: var(--accent); transition: width 0.3s; }
+.mastery-hint { font-size: 12px; color: var(--muted); }
+
+.seg button.locked { opacity: 0.4; cursor: not-allowed; }
+.seg button.locked::before { content: "🔒 "; font-size: 0.8em; }
+
+.time-chip {
+  font-family: var(--f-disp); font-weight: 500; font-size: 15px; letter-spacing: 0.06em;
+  padding: 2px 10px; border: 2px solid currentColor; opacity: 0.85;
+}
+.time-chip.fast { background: var(--ink); color: var(--cream); border-color: var(--ink); opacity: 1; }
+[data-film="metropolis"] .time-chip.fast { background: #d4a64a; color: #0b0906; border-color: #d4a64a; }
+
+.credits { gap: 22px; }
+.credits h3 { font-size: 15px; letter-spacing: 0.14em; margin-bottom: 10px; }
+.credits-head { text-align: center; }
+.credits-tag {
+  display: inline-block; padding: 3px 14px; background: var(--ink); color: var(--cream);
+  font-family: var(--f-disp); font-weight: 500; text-transform: uppercase; letter-spacing: 0.3em; font-size: 13px;
+  clip-path: var(--cut3);
+}
+.big-score { font-family: var(--f-disp); font-weight: 700; font-size: clamp(64px, 14vw, 120px); line-height: 1; margin-top: 12px; }
+.big-score small { display: block; font-size: 14px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.7; margin-top: 6px; }
+.record-line { margin: 12px 0 0; font-family: var(--f-disp); font-size: 18px; letter-spacing: 0.06em; text-transform: uppercase; }
+.record-line.is-record { color: #e0572a; }
+.level-up {
+  display: inline-block; margin: 12px 0 0; padding: 6px 16px; background: #e0572a; color: var(--ink);
+  font-family: var(--f-disp); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; clip-path: var(--cut2);
+}
+.tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.tile { padding: 12px; text-align: center; background: color-mix(in srgb, var(--text) 8%, transparent); clip-path: var(--cut3); }
+.tile b { display: block; font-family: var(--f-disp); font-size: 30px; line-height: 1.1; }
+.tile small { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.credits-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 18px; }
+.credit-list { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 15px; }
+.credit-list li { display: flex; justify-content: space-between; gap: 12px; }
+.credit-list b { font-family: var(--f-disp); font-weight: 500; white-space: nowrap; }
+.spark { display: block; width: 100%; max-width: 420px; height: auto; }
+.spark polyline { fill: none; stroke: currentColor; stroke-width: 2.5; }
+.spark circle { fill: #e0572a; }
+.spark-cap { font-size: 13px; margin: 6px 0 0; }
+.credits-actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+
 .staff-stage { display: flex; justify-content: center; padding: 10px; background: var(--paper); clip-path: var(--cut2); }
 .staff-stage .staff { width: 100%; max-width: 460px; }
 
@@ -627,3 +677,4 @@ tr.clickable[aria-selected="true"] td.muted { color: inherit; opacity: 0.75; }
   .cover-spiral, .cover-figure, .psycho-bar, .psycho-note, .alien-crack, .alien-stars circle, .poster--whiplash .beat, .film-bg .beat, .verdict { animation: none; }
   .session, .reel, .answer, .pager a { transition: none; }
 }
+[data-film="metropolis"] .credits-tag { background: #d4a64a; color: #0b0906; }

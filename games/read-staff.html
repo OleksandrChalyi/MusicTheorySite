@@ -26,7 +26,9 @@
       </div>
     </details>
 
-    <section class="stage">
+    <div class="mastery" id="mastery"></div>
+
+    <section class="stage" id="play">
       <div class="prompt">
         <div><span class="question">Что за нота?</span><span class="question-sub">Гитарный ключ: звучит на октаву ниже записи</span></div>
         <button class="ghost-btn" id="hint">Подсказка</button>
@@ -39,10 +41,11 @@
         <div class="scroll-x" id="board"></div>
       </div>
     </section>
+    <section class="stage credits" id="results" hidden></section>
 
     <div class="game-foot">
       <span>Забыл, как читать стан? <a href="../theory/staff.html">Урок «Нотный стан и ключи»</a>.</span>
-      <button id="reset">Сбросить статистику нот</button>
+      <button id="reset">Сбросить прогресс игры</button>
     </div>
   </main>
 
@@ -57,21 +60,31 @@
     // A note is stored as a diatonic position p: letter = p % 7, octave = floor(p / 7).
     // Written range: "staff" D4..G5 (on the five lines), "full" E3..B5 (whole neck up to the 12th fret).
     const RANGES = { staff: [29, 39], full: [23, 41] };
-    const score = new Score('read-staff', $('#stats'));
-    const game = { p: null, done: false, ok: false, picked: null, hint: false };
+    const game = { p: null, done: false, ok: false, picked: null, hint: false, ms: null };
 
     const writtenNote = p => makeNote(p % 7, 0, Math.floor(p / 7));
     const soundingMidi = p => writtenNote(p).midi - 12;
+    const positions = range => { const [lo, hi] = RANGES[range]; const out = []; for (let p = lo; p <= hi; p++) out.push(p); return out; };
 
-    function next() {
-      const [lo, hi] = RANGES[settings.staffRange];
-      let cands = [];
-      for (let p = lo; p <= hi; p++) cands.push(p);
-      if (game.p !== null && cands.length > 1) cands = cands.filter(p => p !== game.p);
-      game.p = weightedPick(cands, p => itemWeight(store.staff[p]));
-      Object.assign(game, { done: false, ok: false, picked: null, hint: false });
-      render();
-    }
+    const session = new Session({
+      gameId: 'read-staff',
+      hud: $('#stats'), stage: $('#play'), resultsEl: $('#results'), progressEl: $('#mastery'),
+      levels: {
+        setting: 'staffRange',
+        values: ['staff', 'full'],
+        label: v => (v === 'staff' ? 'ноты на линейках' : 'весь гриф с добавочными линейками'),
+        keysFor: v => positions(v).map(String),
+      },
+      onQuestion(focus) {
+        let cands = positions(settings.staffRange);
+        if (focus) { const f = cands.filter(p => focus.has(String(p))); if (f.length) cands = f; }
+        if (game.p !== null && cands.length > 1) cands = cands.filter(p => p !== game.p);
+        game.p = weightedPick(cands, p => itemWeight(store.staff[p]));
+        Object.assign(game, { done: false, ok: false, picked: null, hint: false, ms: null });
+        render();
+        session.ask();
+      },
+    });
 
     function render() {
       const note = writtenNote(game.p);
@@ -92,10 +105,10 @@
       if (!game.done) {
         fb.innerHTML = game.hint
           ? `<span class="hint">Линейки снизу вверх: ${[2, 4, 6, 1, 3].map(letterName).join(', ')}. Промежутки: ${[3, 5, 0, 2].map(letterName).join(', ')}.</span>`
-          : '<span class="hint">Выбери название ноты.</span>';
+          : '<span class="hint">Выбери название ноты. Чем быстрее — тем больше очков.</span>';
       } else {
         const where = spots.map(x => `${x.s + 1}-я струна, ${x.f === 0 ? 'открытая' : x.f + ' лад'}`).join(' · ');
-        fb.innerHTML = verdictHtml(game.ok, `Это <b>${noteName(note)}</b>${alt(altNoteName(note))} <span class="hint">· ${LETTERS_EN[note.letter]}${note.octave} по записи</span>. На гитаре: ${where}.`, !game.ok);
+        fb.innerHTML = verdictHtml(game.ok, `Это <b>${noteName(note)}</b>${alt(altNoteName(note))} <span class="hint">· ${LETTERS_EN[note.letter]}${note.octave} по записи</span>. На гитаре: ${where}.`, !game.ok, game.ms);
       }
 
       $('#boardWrap').hidden = !game.done;
@@ -109,24 +122,32 @@
       const note = writtenNote(game.p);
       Object.assign(game, { done: true, picked: li, ok: li === note.letter });
       recordResult(store.staff, game.p, game.ok);
-      score.record(game.ok);
+      game.ms = session.record({
+        key: String(game.p), ok: game.ok, given: letterName(li),
+        label: `${noteName(note)} · ${LETTERS_EN[note.letter]}${note.octave}`,
+      }).ms;
       pluck(soundingMidi(game.p));
       render();
-      if (game.ok) { const token = game.p; setTimeout(() => { if (game.p === token && game.done) next(); }, 1100); }
+      if (game.ok) { const token = game.p; setTimeout(() => { if (game.p === token && game.done) session.next(); }, 1100); }
     }
 
-    $('.stage').addEventListener('click', e => {
+    $('#play').addEventListener('click', e => {
       const btn = e.target.closest('[data-answer]');
       if (btn) answer(Number(btn.dataset.answer));
-      if (e.target.closest('[data-next]')) next();
+      if (e.target.closest('[data-next]')) session.next();
     });
     enableFretSounds($('#board'));
     $('#hint').addEventListener('click', () => { game.hint = true; render(); });
-    document.addEventListener('keydown', e => { if (e.key === 'Enter' && game.done && !game.ok && !e.target.closest('button')) next(); });
-    document.addEventListener('settingschange', e => (e.detail.key === 'staffRange' ? next() : render()));
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && game.done && !game.ok && !session.finished && !e.target.closest('button')) session.next();
+    });
+    document.addEventListener('settingschange', e => {
+      if (e.detail.key === 'staffRange') session.start();
+      else if (!$('#play').hidden) render();
+    });
     bindControls($('.settings'));
-    bindReset($('#reset'), () => { store.staff = {}; });
-    next();
+    bindReset($('#reset'), () => { store.staff = {}; session.resetProgress(); });
+    session.start();
   </script>
 </body>
 </html>

@@ -12,7 +12,7 @@
 <body data-root="../" data-section="games">
   <main class="page">
     <h1>Игры</h1>
-    <p class="lead">Короткие тренажёры. Выбери сеанс и играй, пока серия не станет больше 10.</p>
+    <p class="lead">Сеанс — 20 нот на время. Отвечай быстро и верно, выучивай ноты и открывай новые уровни.</p>
     <div class="lineup" id="gameList"></div>
   </main>
 
@@ -23,7 +23,7 @@
     $('#gameList').innerHTML = GAMES.map((g, i) => `
       <a class="reel ${reelTheme(g.film, i)}" href="${g.slug}.html">
         <span class="art">${POSTERS[g.film].mini()}</span>
-        ${store.best[g.slug] ? `<span class="seen">Рекорд ${store.best[g.slug]}</span>` : ''}
+        ${store.bestScore && store.bestScore[g.slug] ? `<span class="seen">Рекорд ${store.bestScore[g.slug]}</span>` : ''}
         <span class="num">${String(i + 1).padStart(2, '0')}</span>
         <span class="film">${g.filmName}</span>
         <h3>${g.title}</h3>
