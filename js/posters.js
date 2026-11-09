@@ -345,28 +345,7 @@ const BACKDROPS = {
     right: `<rect x="110" y="340" width="56" height="560" fill="#0b0b0b"/>${[...Array(14).keys()].map(i => `<rect x="110" y="${370 + i * 34}" width="56" height="2" fill="#3a3a3a"/>`).join('')}`,
   }),
 
-  suspects: () => {
-    const chart = mirror => {
-      let s = '';
-      for (let i = 0; i < 24; i++) {
-        const y = 40 + i * 36;
-        s += `<rect x="0" y="${y}" width="200" height="2" fill="#e6e1d5" opacity="0.18"/>`;
-        if (i % 2 === 0) s += `<text x="${mirror ? 10 : 190}" y="${y - 6}" text-anchor="${mirror ? 'start' : 'end'}" fill="#e6e1d5" opacity="0.35" font-family="Oswald" font-size="13">${210 - i * 5}</text>`;
-      }
-      return s;
-    };
-    return { left: chart(false), right: chart(true) };
-  },
-
-  nxnw: () => {
-    const grid = () => {
-      let s = '';
-      for (let i = -4; i < 10; i++) s += `<line x1="${i * 34 + 90}" y1="0" x2="${i * 34}" y2="900" stroke="#eaf2ea" stroke-width="2" opacity="0.18"/>`;
-      for (let i = 0; i < 16; i++) s += `<line x1="0" y1="${40 + i * 58}" x2="200" y2="${20 + i * 58}" stroke="#eaf2ea" stroke-width="2" opacity="0.18"/>`;
-      return s;
-    };
-    return { left: grid(), right: grid() + '<polygon points="80,400 150,420 80,440" fill="#e0572a" opacity="0.8"/>' };
-  },
+  // suspects and nxnw: no side graphics on purpose — fretboard games need a quiet page.
 
   metropolis: () => {
     const rays = (cx, cy) => {

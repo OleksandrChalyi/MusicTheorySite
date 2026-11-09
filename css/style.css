@@ -340,8 +340,24 @@ p { margin: 0 0 14px; }
 .poster--metropolis h1 { font-weight: 500; letter-spacing: 0.22em; color: #d4a64a; }
 .poster--metropolis .crumbs { background: #d4a64a; color: #0b0906; }
 
-[data-film="suspects"] .stage { background: #2b333b; }
-[data-film="nxnw"] .stage { background: #246f56; }
+/* Fretboard games: a calm light "paper" stage so the dark neck is the one focal point
+   (same recipe as Metropolis, where the staff sits on paper). The film lives in the poster only. */
+[data-film="suspects"] { --stage-paper: #e9e5dc; }
+[data-film="nxnw"] { --stage-paper: #eceee4; }
+:is([data-film="suspects"], [data-film="nxnw"]) .stage { --out-opacity: 0.78; }
+:is([data-film="suspects"], [data-film="nxnw"]) .stage {
+  --text: #141210; --muted: #5d5850; --line: #141210;
+  background: var(--stage-paper);
+}
+:is([data-film="suspects"], [data-film="nxnw"]) .stage .board .fnum { fill: #141210; fill-opacity: 0.6; }
+:is([data-film="suspects"], [data-film="nxnw"]) .ghost-btn:hover { background: var(--ink); color: var(--cream); }
+:is([data-film="suspects"], [data-film="nxnw"]) .answer.right { background: #1f6f5c; color: var(--cream); }
+:is([data-film="suspects"], [data-film="nxnw"]) .answer.wrong { background: #c8261d; color: var(--cream); }
+:is([data-film="suspects"], [data-film="nxnw"]) .verdict.ok { background: #1f6f5c; color: var(--cream); }
+:is([data-film="suspects"], [data-film="nxnw"]) .verdict.bad { background: #c8261d; color: var(--cream); }
+:is([data-film="suspects"], [data-film="nxnw"]) .next-btn { background: var(--ink); color: var(--cream); }
+:is([data-film="suspects"], [data-film="nxnw"]) .next-btn:hover { background: #2a2420; }
+:is([data-film="suspects"], [data-film="nxnw"]) .path { color: #a3461a; }
 [data-film="metropolis"] .stage { background: #1d1810; --muted: #c2ab78; }
 [data-film="metropolis"] .stage .question { letter-spacing: 0.08em; color: #d4a64a; }
 
@@ -454,12 +470,13 @@ tr.clickable[aria-selected="true"] td.muted { color: inherit; opacity: 0.75; }
 .scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .board { display: block; width: 100%; min-width: 640px; height: auto; user-select: none; }
 .board .wood { fill: #1c1714; }
+.board .headstock { fill: #0f0c0a; }
 .board .fret { stroke: #8f8273; stroke-width: 2; }
 .board .nut { fill: var(--cream); }
 .board .inlay { fill: var(--cream); fill-opacity: 0.25; }
 .board .string { stroke: #e6dcc8; }
 .board .string.active { stroke: #e0572a; }
-.board .out { fill: #000; opacity: 0.55; }
+.board .out { fill: var(--stage-paper, #000); opacity: var(--out-opacity, 0.55); }
 .board .cell { fill: transparent; }
 .board.clickable .cell { cursor: pointer; }
 .board.clickable .cell:hover { fill: #fff; fill-opacity: 0.12; }

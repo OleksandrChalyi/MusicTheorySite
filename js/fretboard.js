@@ -26,6 +26,8 @@ const cellW = f => (f === 0 ? FB.nut - 6 : FB.fretW);
 function drawFretboard(opts = {}) {
   const { nut, fretW, top, bottom, width } = FB;
   let h = `<svg class="board${opts.clickable ? ' clickable' : ''}" viewBox="0 0 ${width} 218" role="img" aria-label="Гитарный гриф, лады 0–12">`;
+  // Dark area behind the open strings too, so they never sit on a light page.
+  h += `<rect class="headstock" x="2" y="${top}" width="${nut - 2}" height="${bottom - top}" rx="3"/>`;
   h += `<rect class="wood" x="${nut}" y="${top}" width="${12 * fretW}" height="${bottom - top}" rx="3"/>`;
 
   // inlays
@@ -41,14 +43,16 @@ function drawFretboard(opts = {}) {
   }
   h += `<rect class="nut" x="${nut - 5}" y="${top}" width="6" height="${bottom - top}"/>`;
 
-  if (opts.maxFret != null && opts.maxFret < 12) {
-    h += `<rect class="out" x="${nut + opts.maxFret * fretW + 1}" y="${top}" width="${(12 - opts.maxFret) * fretW}" height="${bottom - top}"/>`;
-  }
-
   for (let s = 0; s < 6; s++) {
     const active = opts.activeString === s;
     const w = active ? 3.2 : (0.9 + s * 0.4).toFixed(2);
-    h += `<line class="string${active ? ' active' : ''}" x1="6" y1="${stringY(s)}" x2="${width - 4}" y2="${stringY(s)}" stroke-width="${w}"/>`;
+    h += `<line class="string${active ? ' active' : ''}" x1="4" y1="${stringY(s)}" x2="${width - 4}" y2="${stringY(s)}" stroke-width="${w}"/>`;
+  }
+
+  // Frets outside the practice range fade out (drawn over the strings, so they fade too).
+  if (opts.maxFret != null && opts.maxFret < 12) {
+    const x = nut + opts.maxFret * fretW + 1;
+    h += `<rect class="out" x="${x}" y="${top - 2}" width="${width - x}" height="${bottom - top + 4}"/>`;
   }
 
   for (let s = 0; s < 6; s++) {
