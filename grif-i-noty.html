@@ -1,0 +1,469 @@
+<title>Гриф и ноты</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Rubik:wght@400;500;700&family=Noto+Music&display=swap">
+<style>
+/* Layout: red slashed title band, skewed tabs, one black stage panel per drill with a hard red offset shadow */
+:root{
+  --ink:#0c0b0d; --panel:#161419; --wood:#1f1b21; --line:#332f37;
+  --paper:#f4f1ea; --string:#cfc8bd; --fret:#8a8580; --mute:#9d9891;
+  --red:#e4141c; --red-dk:#6f0a10; --ok:#2fd27a; --warn:#f2b632;
+  --f-disp:'Oswald','Arial Narrow',Impact,sans-serif;
+  --f-body:'Rubik',system-ui,-apple-system,sans-serif;
+  --f-music:'Noto Music','Segoe UI Symbol','Apple Symbols',serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--ink)}
+body{color:var(--paper);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1000px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 48px;display:flex;flex-direction:column;gap:18px}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible{outline:3px solid var(--warn);outline-offset:2px}
+
+/* header */
+.top{position:relative;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;padding:22px 20px 18px;background:var(--red);clip-path:polygon(0 0,100% 0,100% 82%,96% 100%,0 100%);overflow:hidden}
+.top::before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle at 1px 1px,var(--ink) 1.1px,transparent 1.6px);background-size:8px 8px;opacity:.22;-webkit-mask-image:linear-gradient(110deg,transparent 35%,#000 90%);mask-image:linear-gradient(110deg,transparent 35%,#000 90%)}
+.brand{position:relative}
+.kicker{display:inline-block;background:var(--ink);color:var(--paper);font-family:var(--f-disp);font-weight:500;letter-spacing:.18em;text-transform:uppercase;font-size:12px;padding:3px 10px;transform:skewX(-14deg) rotate(-2deg)}
+h1{margin:6px 0 0;font-family:var(--f-disp);font-weight:700;font-size:clamp(40px,9vw,72px);line-height:.9;text-transform:uppercase;letter-spacing:.01em;color:var(--paper);text-shadow:4px 4px 0 var(--ink);transform:rotate(-2deg);text-wrap:balance}
+h1 span{display:inline-block;background:var(--paper);color:var(--ink);text-shadow:none;padding:0 .12em;transform:skewX(-10deg)}
+.stats{position:relative;display:flex;gap:8px}
+.stat{background:var(--ink);padding:6px 12px 8px;min-width:78px;transform:skewX(-10deg)}
+.stat>*{display:block;transform:skewX(10deg)}
+.stat b{font-family:var(--f-disp);font-size:26px;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat small{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+
+/* tabs + toolbar */
+.navrow{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+.tabs{display:flex;flex-wrap:wrap;gap:6px}
+.tabs button{font-family:var(--f-disp);font-weight:700;text-transform:uppercase;font-size:17px;letter-spacing:.04em;padding:8px 18px;background:var(--panel);border:2px solid var(--paper);transform:skewX(-14deg)}
+.tabs button span{display:inline-block;transform:skewX(14deg)}
+.tabs button[aria-selected="true"]{background:var(--paper);color:var(--ink);box-shadow:4px 4px 0 var(--red)}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+
+.seg{display:inline-flex;border:2px solid var(--line)}
+.seg button,.tog{padding:6px 12px;font-size:13px;font-weight:500;color:var(--mute)}
+.seg button[aria-pressed="true"]{background:var(--paper);color:var(--ink)}
+.tog{border:2px solid var(--line)}
+.tog[aria-pressed="true"]{border-color:var(--red);color:var(--paper);background:var(--red-dk)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lab{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-right:2px}
+
+/* stage */
+.stage{background:var(--panel);border:2px solid var(--paper);box-shadow:7px 7px 0 var(--red);padding:16px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.prompt{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
+.q{font-family:var(--f-disp);font-weight:700;font-size:clamp(24px,5vw,34px);text-transform:uppercase;line-height:1.05}
+.q b{background:var(--red);padding:0 .15em;display:inline-block;transform:skewX(-10deg)}
+.sub{display:block;color:var(--mute);font-size:14px;margin-top:2px}
+.play{font-family:var(--f-disp);font-weight:500;text-transform:uppercase;letter-spacing:.06em;font-size:14px;padding:7px 14px;border:2px solid var(--paper)}
+.play:hover{background:var(--paper);color:var(--ink)}
+.scroll{overflow-x:auto;min-width:0;-webkit-overflow-scrolling:touch}
+
+/* fretboard */
+.board{display:block;width:100%;min-width:640px;height:auto;user-select:none}
+.wood{fill:var(--wood)}
+.fret{stroke:var(--fret);stroke-width:2}
+.nut{fill:var(--paper)}
+.inlay{fill:var(--line)}
+.string{stroke:var(--string)}
+.string.active{stroke:var(--red)}
+.out{fill:var(--ink);opacity:.66}
+.cell{fill:transparent}
+.clickable .cell{cursor:pointer}
+.clickable .cell:hover{fill:var(--paper);fill-opacity:.09}
+.heat-good{fill:var(--ok);fill-opacity:.25}
+.heat-mid{fill:var(--warn);fill-opacity:.3}
+.heat-bad{fill:var(--red);fill-opacity:.45}
+.mk{pointer-events:none}
+.mk circle{stroke-width:2}
+.mk text{font-family:var(--f-disp);font-weight:700;text-anchor:middle;dominant-baseline:central}
+.mk.target circle{fill:var(--red);stroke:var(--paper)}
+.mk.target text{fill:var(--paper)}
+.mk.ok circle{fill:var(--ok);stroke:var(--ink)}
+.mk.ok text,.mk.note text{fill:var(--ink)}
+.mk.bad circle{fill:var(--red-dk);stroke:var(--red)}
+.mk.bad text,.mk.root text{fill:var(--paper)}
+.mk.root circle{fill:var(--red);stroke:var(--paper)}
+.mk.note circle{fill:var(--paper);stroke:var(--ink)}
+.fnum{fill:var(--mute);font-family:var(--f-disp);font-size:12px;text-anchor:middle}
+
+/* answers */
+.answers{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:8px}
+.nbtn{font-family:var(--f-disp);font-weight:700;font-size:19px;padding:10px 4px;background:var(--ink);border:2px solid var(--line);transform:skewX(-8deg);transition:transform .08s}
+.nbtn span{display:inline-block;transform:skewX(8deg)}
+.nbtn:hover{border-color:var(--paper)}
+.nbtn:active{transform:skewX(-8deg) translateY(2px)}
+.nbtn.sharp{color:var(--mute)}
+.nbtn.right{background:var(--ok);border-color:var(--ok);color:var(--ink)}
+.nbtn.wrong{background:var(--red-dk);border-color:var(--red);color:var(--paper)}
+.nbtn:disabled{cursor:default}
+
+.fb{min-height:56px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px}
+.fb p{margin:0;max-width:62ch;min-width:0}
+.hint{color:var(--mute);font-size:14px}
+.stamp{font-family:var(--f-disp);font-weight:700;font-size:26px;text-transform:uppercase;padding:2px 14px;transform:rotate(-4deg) skewX(-12deg);animation:pop .22s ease-out}
+.stamp.ok{background:var(--ok);color:var(--ink)}
+.stamp.bad{background:var(--red);color:var(--paper)}
+@keyframes pop{from{transform:rotate(-4deg) skewX(-12deg) scale(1.4)}to{transform:rotate(-4deg) skewX(-12deg) scale(1)}}
+.next{font-family:var(--f-disp);font-weight:700;text-transform:uppercase;font-size:16px;padding:8px 18px;background:var(--paper);color:var(--ink);box-shadow:4px 4px 0 var(--red);transform:skewX(-10deg)}
+.path{font-family:var(--f-disp);letter-spacing:.03em;color:var(--warn)}
+
+/* staff */
+.staffbox{display:flex;justify-content:center}
+.staff{width:100%;max-width:420px;height:auto}
+.staff .sl{stroke:var(--paper);stroke-width:1.6}
+.staff .ledger{stroke:var(--paper);stroke-width:1.8}
+.staff .head{fill:none;stroke:var(--paper);stroke-width:2.6}
+.staff .head.ok{stroke:var(--ok)}
+.staff .head.bad{stroke:var(--red)}
+.staff .clef{fill:var(--paper);font-family:var(--f-music);font-size:60px}
+.staff .eight{fill:var(--paper);font-family:var(--f-disp);font-size:13px;text-anchor:middle}
+.minilab{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+
+/* theory */
+.roots{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:6px}
+.roots .nbtn{font-size:16px;padding:7px 2px}
+.roots .nbtn[aria-pressed="true"]{background:var(--red);border-color:var(--paper)}
+.shapes{display:flex;flex-wrap:wrap;gap:6px}
+.shapes button{padding:6px 12px;border:2px solid var(--line);font-size:14px}
+.shapes button[aria-pressed="true"]{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+.notes{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:flex;flex-direction:column;align-items:center;min-width:64px;padding:6px 10px;background:var(--ink);border:2px solid var(--line)}
+.chip b{font-family:var(--f-disp);font-size:20px}
+.chip small{color:var(--mute);font-size:11px;text-align:center;line-height:1.25}
+.chip.root{border-color:var(--red)}
+.steps{font-family:var(--f-disp);letter-spacing:.08em;color:var(--warn)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:16px}
+.card{background:var(--panel);border:2px solid var(--line);padding:14px 16px;min-width:0}
+.card h3{margin:0 0 10px;font-family:var(--f-disp);font-weight:700;text-transform:uppercase;font-size:18px;letter-spacing:.04em;display:inline-block;background:var(--paper);color:var(--ink);padding:1px 10px;transform:skewX(-10deg)}
+.card ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+.card p{margin:0 0 8px}
+table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+td,th{padding:4px 6px;border-bottom:1px solid var(--line);text-align:left}
+th{color:var(--mute);font-weight:500;font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+td:first-child{font-family:var(--f-disp);color:var(--warn)}
+.h2{font-family:var(--f-disp);font-weight:700;text-transform:uppercase;font-size:22px;margin:6px 0 0;letter-spacing:.03em}
+.foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;color:var(--mute);font-size:13px}
+.foot button{color:var(--mute);text-decoration:underline}
+@media (max-width:520px){.top{clip-path:none}.stats{width:100%}.stat{flex:1;min-width:0}}
+@media (prefers-reduced-motion:reduce){.stamp{animation:none}.nbtn{transition:none}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <span class="kicker">тренажёр гитариста</span>
+      <h1>Гриф <span>и ноты</span></h1>
+    </div>
+    <div class="stats" aria-live="polite">
+      <div class="stat"><b id="stStreak">0</b><small>серия</small></div>
+      <div class="stat"><b id="stBest">0</b><small>рекорд</small></div>
+      <div class="stat"><b id="stAcc">—</b><small>точность</small></div>
+    </div>
+  </header>
+
+  <div class="navrow">
+    <div class="tabs" role="tablist">
+      <button role="tab" data-tab="fret" id="tb-fret"><span>Гриф</span></button>
+      <button role="tab" data-tab="staff" id="tb-staff"><span>Нотный стан</span></button>
+      <button role="tab" data-tab="theory" id="tb-theory"><span>Теория</span></button>
+    </div>
+    <div class="tools">
+      <div class="seg" data-key="notation"><button data-val="ru" id="n-ru">До Ре Ми</button><button data-val="en" id="n-en">C D E</button></div>
+      <button class="tog" data-key="sound" id="t-sound">Звук</button>
+    </div>
+  </div>
+
+  <!-- FRETBOARD -->
+  <section id="tab-fret" class="stage">
+    <div class="chips">
+      <div class="seg" data-key="fretMode"><button data-val="guess" id="m-guess">Угадай ноту</button><button data-val="find" id="m-find">Найди на грифе</button></div>
+      <span class="lab">лады</span>
+      <div class="seg" data-key="maxFret" data-num="1"><button data-val="4" id="r4">0–4</button><button data-val="7" id="r7">0–7</button><button data-val="12" id="r12">0–12</button></div>
+      <button class="tog" data-key="natural" id="t-nat">Без диезов</button>
+      <button class="tog" data-key="heat" id="t-heat">Карта ошибок</button>
+    </div>
+    <div class="prompt" id="fretPrompt"></div>
+    <div class="scroll" id="fretBoard"></div>
+    <div class="answers" id="fretAnswers"></div>
+    <div class="fb" id="fretFb" aria-live="polite"></div>
+  </section>
+
+  <!-- STAFF -->
+  <section id="tab-staff" class="stage" hidden>
+    <div class="chips">
+      <span class="lab">диапазон</span>
+      <div class="seg" data-key="staffRange"><button data-val="staff" id="sr1">На линейках</button><button data-val="full" id="sr2">Весь гриф (доп. линейки)</button></div>
+    </div>
+    <div class="prompt"><div><span class="q">Что за нота?</span><span class="sub">Скрипичный ключ с восьмёркой: гитара звучит на октаву ниже записи</span></div></div>
+    <div class="staffbox" id="staffBox"></div>
+    <div class="answers" id="staffAnswers"></div>
+    <div class="fb" id="staffFb" aria-live="polite"></div>
+    <div class="minilab">где эта нота на грифе</div>
+    <div class="scroll" id="staffBoard"></div>
+  </section>
+
+  <!-- THEORY -->
+  <section id="tab-theory" hidden style="display:flex;flex-direction:column;gap:18px">
+    <div class="stage">
+      <div class="prompt"><div><span class="q">Гаммы и аккорды</span><span class="sub">Выбери тонику и что построить — увидишь всё на грифе</span></div><button class="play" id="playShape">▶ Сыграть</button></div>
+      <div class="roots" id="roots"></div>
+      <div class="shapes" id="shapes"></div>
+      <div class="chips"><span class="lab">на грифе</span><div class="seg" data-key="label"><button data-val="name" id="l-name">Ноты</button><button data-val="deg" id="l-deg">Ступени</button></div></div>
+      <div class="notes" id="shapeNotes"></div>
+      <div class="steps" id="shapeSteps"></div>
+      <div class="scroll" id="theoryBoard"></div>
+    </div>
+    <div class="h2">Шпаргалка</div>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <div class="foot"><span>Задания подстраиваются: ноты, где ты ошибаешься, выпадают чаще. Прогресс хранится в этом браузере.</span><button id="reset">Сбросить статистику</button></div>
+</div>
+
+<script>
+const OPEN=[64,59,55,50,45,40]; // 1-я (тонкая) … 6-я струна
+const EN=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+const RU=['До','До♯','Ре','Ре♯','Ми','Фа','Фа♯','Соль','Соль♯','Ля','Ля♯','Си'];
+const LET_EN=['C','D','E','F','G','A','B'], LET_RU=['До','Ре','Ми','Фа','Соль','Ля','Си'];
+const LETTER_PC=[0,2,4,5,7,9,11], NAT=LETTER_PC;
+const $=s=>document.querySelector(s);
+
+/* ---------- storage ---------- */
+const KEY='grif-noty-v1';
+let store={fret:{},staff:{},best:0,settings:{}};
+try{const raw=localStorage.getItem(KEY); if(raw) store=Object.assign(store,JSON.parse(raw));}catch(e){}
+const S=Object.assign({tab:'fret',notation:'ru',sound:true,fretMode:'guess',maxFret:4,natural:true,heat:false,staffRange:'staff',label:'name'},store.settings||{});
+function save(){try{store.settings=S;localStorage.setItem(KEY,JSON.stringify(store));}catch(e){}}
+const sess={streak:0,total:0,correct:0};
+function rec(map,k,ok){const r=map[k]||[0,0]; ok?r[0]++:r[1]++; map[k]=r;}
+function weight(r){r=r||[0,0]; const rate=(r[1]+1)/(r[0]+r[1]+2); return .25+rate*3;}
+function pick(arr,wf){let t=0;const ws=arr.map(x=>{const w=wf(x);t+=w;return w});let r=Math.random()*t;for(let i=0;i<arr.length;i++){r-=ws[i];if(r<=0)return arr[i]}return arr[arr.length-1]}
+function score(ok){sess.total++; if(ok){sess.correct++;sess.streak++;if(sess.streak>store.best)store.best=sess.streak;}else sess.streak=0; renderStats(); save();}
+function renderStats(){$('#stStreak').textContent=sess.streak;$('#stBest').textContent=store.best||0;$('#stAcc').textContent=sess.total?Math.round(sess.correct/sess.total*100)+'%':'—';}
+
+const pcName=pc=>(S.notation==='ru'?RU:EN)[((pc%12)+12)%12];
+const letName=li=>(S.notation==='ru'?LET_RU:LET_EN)[li];
+const accStr=a=>a===1?'♯':a===-1?'♭':a===2?'𝄪':a===-2?'𝄫':'';
+const strName=s=>`${s+1}-я струна`;
+const fretName=f=>f===0?'открытая':`${f}-й лад`;
+
+/* ---------- sound: Karplus–Strong pluck ---------- */
+let ctx=null, acted=false;
+function audio(){if(!ctx){const A=window.AudioContext||window.webkitAudioContext;if(!A)return null;ctx=new A();} if(ctx.state==='suspended')ctx.resume(); return ctx;}
+function pluck(midi,when=0){
+  if(!S.sound||!acted)return; const c=audio(); if(!c)return;
+  const f=440*Math.pow(2,(midi-69)/12), sr=c.sampleRate, len=Math.floor(sr*1.8);
+  const buf=c.createBuffer(1,len,sr), d=buf.getChannelData(0), N=Math.max(2,Math.round(sr/f)), ring=new Float32Array(N);
+  for(let i=0;i<N;i++)ring[i]=Math.random()*2-1;
+  let idx=0; for(let i=0;i<len;i++){const nx=(idx+1)%N,v=ring[idx];d[i]=v;ring[idx]=.497*(v+ring[nx]);idx=nx;}
+  const fade=Math.floor(sr*.08); for(let i=0;i<fade;i++)d[len-1-i]*=i/fade;
+  const src=c.createBufferSource(), g=c.createGain(); g.gain.value=.32; src.buffer=buf; src.connect(g).connect(c.destination); src.start(c.currentTime+when);
+}
+document.addEventListener('pointerdown',()=>{acted=true;audio();},{once:true,capture:true});
+document.addEventListener('keydown',()=>{acted=true;},{once:true,capture:true});
+
+/* ---------- fretboard SVG ---------- */
+const NUT=62,FW=58,Y0=24,SG=30,TOP=7,BOT=Y0+5*SG+17,W=NUT+12*FW+8;
+const sy=s=>Y0+s*SG, cx=f=>f===0?31:NUT+(f-.5)*FW, cellX=f=>f===0?2:NUT+(f-1)*FW, cellW=f=>f===0?NUT-6:FW;
+function drawBoard(o){
+  o=o||{}; let h=`<svg class="board${o.clickable?' clickable':''}" viewBox="0 0 ${W} 218" role="img" aria-label="Гитарный гриф, лады 0–12">`;
+  h+=`<rect class="wood" x="${NUT}" y="${TOP}" width="${12*FW}" height="${BOT-TOP}"/>`;
+  [3,5,7,9].forEach(f=>h+=`<circle class="inlay" cx="${cx(f)}" cy="${(sy(2)+sy(3))/2}" r="6"/>`);
+  h+=`<circle class="inlay" cx="${cx(12)}" cy="${(sy(1)+sy(2))/2}" r="6"/><circle class="inlay" cx="${cx(12)}" cy="${(sy(3)+sy(4))/2}" r="6"/>`;
+  if(o.heat){for(let s=0;s<6;s++)for(let f=0;f<=12;f++){const r=store.fret[s+'-'+f];if(!r||r[0]+r[1]===0)continue;const a=r[0]/(r[0]+r[1]);const cl=a>=.8?'heat-good':a>=.5?'heat-mid':'heat-bad';h+=`<rect class="${cl}" x="${cellX(f)+2}" y="${sy(s)-SG/2+2}" width="${cellW(f)-4}" height="${SG-4}"/>`;}}
+  for(let i=1;i<=12;i++)h+=`<line class="fret" x1="${NUT+i*FW}" y1="${TOP}" x2="${NUT+i*FW}" y2="${BOT}"/>`;
+  h+=`<rect class="nut" x="${NUT-5}" y="${TOP}" width="6" height="${BOT-TOP}"/>`;
+  if(o.maxFret!=null&&o.maxFret<12)h+=`<rect class="out" x="${NUT+o.maxFret*FW+1}" y="${TOP}" width="${(12-o.maxFret)*FW}" height="${BOT-TOP}"/>`;
+  for(let s=0;s<6;s++)h+=`<line class="string${o.activeString===s?' active':''}" x1="6" y1="${sy(s)}" x2="${W-4}" y2="${sy(s)}" stroke-width="${o.activeString===s?3.2:(.9+s*.4).toFixed(2)}"/>`;
+  for(let s=0;s<6;s++)for(let f=0;f<=12;f++)h+=`<rect class="cell" data-s="${s}" data-f="${f}" x="${cellX(f)}" y="${sy(s)-SG/2}" width="${cellW(f)}" height="${SG}"><title>${strName(s)}, ${fretName(f)}</title></rect>`;
+  (o.marks||[]).forEach(m=>{const t=String(m.text);const fs=t.length>4?9:t.length>2?11:14;h+=`<g class="mk ${m.kind}"><circle cx="${cx(m.f)}" cy="${sy(m.s)}" r="13"/><text x="${cx(m.f)}" y="${sy(m.s)+.5}" font-size="${fs}">${t}</text></g>`;});
+  for(let f=0;f<=12;f++)h+=`<text class="fnum" x="${cx(f)}" y="212">${f}</text>`;
+  return h+'</svg>';
+}
+
+/* ---------- tab: fretboard ---------- */
+const F={g:null,done:false,ok:false,picked:null,clicked:null,warn:''};
+function fretCands(){const out=[];for(let s=0;s<6;s++)for(let f=0;f<=S.maxFret;f++){const pc=(OPEN[s]+f)%12;if(S.natural&&!NAT.includes(pc))continue;out.push({s,f,pc});}return out;}
+function nextFret(){
+  let c=fretCands(); if(F.g&&c.length>1)c=c.filter(x=>!(x.s===F.g.s&&x.f===F.g.f));
+  F.g=pick(c,x=>weight(store.fret[x.s+'-'+x.f])); F.done=false;F.ok=false;F.picked=null;F.clicked=null;F.warn='';
+  renderFret(); if(S.fretMode==='guess')pluck(OPEN[F.g.s]+F.g.f);
+}
+function countPath(s,f){
+  if(f<=7){const a=[];for(let i=0;i<=f;i++)a.push(pcName(OPEN[s]+i));return `Считай от открытой: ${a.join(' → ')}`;}
+  const a=[];for(let i=12;i>=f;i--)a.push(pcName(OPEN[s]+i));return `12-й лад = открытая струна, назад: ${a.join(' → ')}`;
+}
+function renderFret(){
+  const g=F.g, guess=S.fretMode==='guess';
+  $('#fretPrompt').innerHTML=guess
+    ?`<div><span class="q">Какая это нота?</span><span class="sub">${strName(g.s)}, ${fretName(g.f)}</span></div><button class="play" id="replay">▶ Звук</button>`
+    :`<div><span class="q">Найди <b>${pcName(g.pc)}</b></span><span class="sub">на ${g.s+1}-й струне${S.maxFret<12?`, лады 0–${S.maxFret}`:''}</span></div>`;
+  const marks=[];
+  if(guess){marks.push(F.done?{s:g.s,f:g.f,text:pcName(g.pc),kind:F.ok?'ok':'bad'}:{s:g.s,f:g.f,text:'?',kind:'target'});}
+  else if(F.done){for(let f=0;f<=S.maxFret;f++)if((OPEN[g.s]+f)%12===g.pc)marks.push({s:g.s,f,text:pcName(g.pc),kind:'ok'});
+    if(!F.ok&&F.clicked)marks.push({s:F.clicked.s,f:F.clicked.f,text:pcName(F.clicked.pc),kind:'bad'});}
+  $('#fretBoard').innerHTML=drawBoard({marks,maxFret:S.maxFret,activeString:guess?null:g.s,heat:S.heat,clickable:!guess});
+  const ans=$('#fretAnswers');
+  if(guess){const pcs=S.natural?NAT:[...Array(12).keys()];
+    ans.hidden=false; ans.innerHTML=pcs.map(pc=>{let cl='nbtn'+(NAT.includes(pc)?'':' sharp');if(F.done){if(pc===g.pc)cl+=' right';else if(pc===F.picked)cl+=' wrong';}return `<button class="${cl}" data-pc="${pc}" ${F.done?'disabled':''}><span>${pcName(pc)}</span></button>`;}).join('');}
+  else{ans.hidden=true;ans.innerHTML='';}
+  const fb=$('#fretFb');
+  if(!F.done)fb.innerHTML=`<span class="hint">${F.warn||(guess?'Выбери ноту ниже.':'Нажми лад на красной струне.')}</span>`;
+  else if(F.ok)fb.innerHTML=`<div class="stamp ok">Верно!</div><p>${guess?`${strName(g.s)}, ${fretName(g.f)} — ${pcName(g.pc)}.`:`${pcName(g.pc)} на ${g.s+1}-й струне — все места отмечены.`}</p>`;
+  else if(guess)fb.innerHTML=`<div class="stamp bad">Мимо</div><p>Это <b>${pcName(g.pc)}</b>, а не ${pcName(F.picked)}.<br><span class="path">${countPath(g.s,g.f)}</span></p><button class="next" id="nextF">Дальше →</button>`;
+  else fb.innerHTML=`<div class="stamp bad">Мимо</div><p>Там ${pcName(F.clicked.pc)}. Нужная нота отмечена зелёным.<br><span class="path">${countPath(g.s,F.g.f)}</span></p><button class="next" id="nextF">Дальше →</button>`;
+}
+function answerGuess(pc){
+  if(F.done)return; const g=F.g; F.done=true;F.picked=pc;F.ok=pc===g.pc;
+  rec(store.fret,g.s+'-'+g.f,F.ok); score(F.ok); pluck(OPEN[g.s]+g.f); renderFret();
+  if(F.ok){const tok=g;setTimeout(()=>{if(F.g===tok&&F.done)nextFret();},800);}
+}
+function clickFret(s,f){
+  if(S.fretMode!=='find'||F.done)return; const g=F.g;
+  if(s!==g.s){F.warn=`Это ${strName(s)}. Нужна ${g.s+1}-я — она подсвечена красным.`;pluck(OPEN[s]+f);renderFret();return;}
+  const pc=(OPEN[s]+f)%12; F.done=true;F.ok=pc===g.pc;F.clicked={s,f,pc};
+  rec(store.fret,g.s+'-'+g.f,F.ok); score(F.ok); pluck(OPEN[s]+f); renderFret();
+  if(F.ok){const tok=g;setTimeout(()=>{if(F.g===tok&&F.done)nextFret();},900);}
+}
+$('#tab-fret').addEventListener('click',e=>{
+  const b=e.target.closest('[data-pc]'); if(b){answerGuess(+b.dataset.pc);return;}
+  const c=e.target.closest('.cell'); if(c){clickFret(+c.dataset.s,+c.dataset.f);return;}
+  if(e.target.closest('#replay'))pluck(OPEN[F.g.s]+F.g.f);
+  if(e.target.closest('#nextF'))nextFret();
+});
+
+/* ---------- tab: staff ---------- */
+const T={p:null,done:false,ok:false,picked:null};
+const posInfo=p=>{const li=p%7,oct=Math.floor(p/7);const written=12*(oct+1)+LETTER_PC[li];return {li,oct,written,sound:written-12};};
+function guitarSpots(midi){const out=[];for(let s=0;s<6;s++){const f=midi-OPEN[s];if(f>=0&&f<=12)out.push({s,f});}return out;}
+function nextStaff(){
+  const [lo,hi]=S.staffRange==='full'?[23,41]:[29,39]; let c=[];for(let p=lo;p<=hi;p++)c.push(p);
+  if(T.p!=null&&c.length>1)c=c.filter(p=>p!==T.p);
+  T.p=pick(c,p=>weight(store.staff[p]));T.done=false;T.ok=false;T.picked=null; renderStaff();
+}
+function staffSVG(){
+  const y=p=>118-(p-30)*7, p=T.p, ny=y(p), nx=210; let h=`<svg class="staff" viewBox="0 0 320 190" role="img" aria-label="Нота на нотном стане">`;
+  for(let k=0;k<5;k++)h+=`<line class="sl" x1="12" y1="${118-k*14}" x2="308" y2="${118-k*14}"/>`;
+  h+=`<text class="clef" x="20" y="118">𝄞</text><text class="eight" x="44" y="176">8</text>`;
+  if(p<=28)for(let q=28;q>=p;q-=2)h+=`<line class="ledger" x1="${nx-18}" y1="${y(q)}" x2="${nx+18}" y2="${y(q)}"/>`;
+  if(p>=40)for(let q=40;q<=p;q+=2)h+=`<line class="ledger" x1="${nx-18}" y1="${y(q)}" x2="${nx+18}" y2="${y(q)}"/>`;
+  h+=`<ellipse class="head${T.done?(T.ok?' ok':' bad'):''}" cx="${nx}" cy="${ny}" rx="9.5" ry="6.6" transform="rotate(-22 ${nx} ${ny})"/>`;
+  return h+'</svg>';
+}
+function fitClef(){
+  const svg=$('#staffBox svg'); if(!svg)return; const t=svg.querySelector('.clef'), e=svg.querySelector('.eight');
+  t.removeAttribute('transform'); let b; try{b=t.getBBox();}catch(err){return;} if(!b||!b.height)return;
+  const sc=108/b.height, tx=22-b.x*sc, ty=38-b.y*sc; t.setAttribute('transform',`translate(${tx} ${ty}) scale(${sc})`);
+  e.setAttribute('x',(22+b.width*sc/2).toFixed(1)); e.setAttribute('y',(38+108+14).toFixed(1));
+}
+function renderStaff(){
+  const info=posInfo(T.p);
+  $('#staffBox').innerHTML=staffSVG(); fitClef();
+  $('#staffAnswers').innerHTML=LETTER_PC.map((_,li)=>{let cl='nbtn';if(T.done){if(li===info.li)cl+=' right';else if(li===T.picked)cl+=' wrong';}return `<button class="${cl}" data-li="${li}" ${T.done?'disabled':''}><span>${letName(li)}</span></button>`;}).join('');
+  const spots=guitarSpots(info.sound);
+  const fb=$('#staffFb');
+  if(!T.done)fb.innerHTML=`<span class="hint">Линии снизу вверх: ${[2,4,6,1,3].map(letName).join(', ')}. Промежутки: ${[3,5,0,2].map(letName).join(', ')}.</span>`;
+  else{const where=spots.map(x=>`${x.s+1}-я струна, ${x.f===0?'открытая':x.f+' лад'}`).join(' · ');
+    fb.innerHTML=(T.ok?`<div class="stamp ok">Верно!</div>`:`<div class="stamp bad">Мимо</div>`)+`<p>Это <b>${letName(info.li)}</b> <span class="hint">(по записи ${LET_EN[info.li]}${info.oct})</span>. На гитаре: ${where}.</p>`+(T.ok?'':`<button class="next" id="nextS">Дальше →</button>`);}
+  $('#staffBoard').innerHTML=drawBoard({marks:T.done?spots.map(x=>({...x,text:letName(info.li),kind:'ok'})):[]});
+}
+function answerStaff(li){
+  if(T.done)return; const info=posInfo(T.p); T.done=true;T.picked=li;T.ok=li===info.li;
+  rec(store.staff,T.p,T.ok); score(T.ok); pluck(info.sound); renderStaff();
+  if(T.ok){const tok=T.p;setTimeout(()=>{if(T.p===tok&&T.done)nextStaff();},1100);}
+}
+$('#tab-staff').addEventListener('click',e=>{
+  const b=e.target.closest('[data-li]'); if(b){answerStaff(+b.dataset.li);return;}
+  if(e.target.closest('#nextS'))nextStaff();
+  const c=e.target.closest('.cell'); if(c)pluck(OPEN[+c.dataset.s]+(+c.dataset.f));
+});
+
+/* ---------- tab: theory ---------- */
+const SHAPES=[
+  {n:'Мажорная гамма',iv:[0,2,4,5,7,9,11],scale:true},
+  {n:'Минорная гамма',iv:[0,2,3,5,7,8,10],scale:true},
+  {n:'Пентатоника минорная',iv:[0,3,5,7,10],scale:true},
+  {n:'Пентатоника мажорная',iv:[0,2,4,7,9],scale:true},
+  {n:'Мажорное трезвучие',iv:[0,4,7]},
+  {n:'Минорное трезвучие',iv:[0,3,7]},
+  {n:'Доминантсептаккорд',iv:[0,4,7,10]},
+];
+const DEG={0:'1',1:'♭2',2:'2',3:'♭3',4:'3',5:'4',6:'♭5',7:'5',8:'♭6',9:'6',10:'♭7',11:'7'};
+const DEGNUM={0:1,1:2,2:2,3:3,4:3,5:4,6:5,7:5,8:6,9:6,10:7,11:7};
+const INT=['прима','малая секунда','большая секунда','малая терция','большая терция','чистая кварта','тритон','чистая квинта','малая секста','большая секста','малая септима','большая септима','октава'];
+const MAJROOT=[[0,0],[1,-1],[1,0],[2,-1],[2,0],[3,0],[3,1],[4,0],[5,-1],[5,0],[6,-1],[6,0]];
+const MINROOT=[[0,0],[0,1],[1,0],[2,-1],[2,0],[3,0],[3,1],[4,0],[4,1],[5,0],[6,-1],[6,0]];
+const X={root:9,shape:2};
+function spell(root,ivs){
+  const minor=ivs.includes(3)&&!ivs.includes(4); const [rl]=(minor?MINROOT:MAJROOT)[root]; const out={};
+  ivs.forEach(iv=>{const li=(rl+DEGNUM[iv]-1)%7;const tp=(root+iv)%12;const acc=((tp-LETTER_PC[li]+18)%12)-6;out[iv]=letName(li)+accStr(acc);});
+  return out;
+}
+function renderTheory(){
+  const sh=SHAPES[X.shape], sp=spell(X.root,sh.iv);
+  $('#roots').innerHTML=[...Array(12).keys()].map(pc=>`<button class="nbtn${NAT.includes(pc)?'':' sharp'}" data-root="${pc}" aria-pressed="${pc===X.root}"><span>${pcName(pc)}</span></button>`).join('');
+  $('#shapes').innerHTML=SHAPES.map((s,i)=>`<button data-shape="${i}" aria-pressed="${i===X.shape}">${s.n}</button>`).join('');
+  $('#shapeNotes').innerHTML=sh.iv.map(iv=>`<div class="chip${iv===0?' root':''}"><b>${sp[iv]}</b><small>${DEG[iv]} · ${INT[iv]}</small></div>`).join('');
+  if(sh.scale){const st=[];const a=[...sh.iv,12];for(let i=1;i<a.length;i++){const d=a[i]-a[i-1];st.push(d===1?'П':d===2?'Т':'Т+П');}
+    $('#shapeSteps').textContent=`Шаги: ${st.join(' — ')}   (Т — тон = 2 лада, П — полутон = 1 лад)`;}
+  else $('#shapeSteps').textContent=`Аккорд складывается из ступеней ${sh.iv.map(i=>DEG[i]).join(' – ')} — сыграй эти ноты вместе`;
+  const marks=[];for(let s=0;s<6;s++)for(let f=0;f<=12;f++){const iv=((OPEN[s]+f-X.root)%12+12)%12;if(sh.iv.includes(iv))marks.push({s,f,text:S.label==='deg'?DEG[iv]:sp[iv],kind:iv===0?'root':'note'});}
+  $('#theoryBoard').innerHTML=drawBoard({marks,clickable:true});
+  renderCards();
+}
+$('#tab-theory').addEventListener('click',e=>{
+  const r=e.target.closest('[data-root]'); if(r){X.root=+r.dataset.root;renderTheory();pluck(48+X.root);return;}
+  const s=e.target.closest('[data-shape]'); if(s){X.shape=+s.dataset.shape;renderTheory();return;}
+  const c=e.target.closest('.cell'); if(c)pluck(OPEN[+c.dataset.s]+(+c.dataset.f));
+});
+$('#playShape').addEventListener('click',()=>{
+  const sh=SHAPES[X.shape], base=48+X.root; const seq=[...sh.iv,12];
+  seq.forEach((iv,i)=>pluck(base+iv,i*.28));
+  if(!sh.scale)sh.iv.forEach((iv,i)=>pluck(base+iv,seq.length*.28+.25+i*.03));
+});
+function renderCards(){
+  const n=pcName;
+  $('#cards').innerHTML=`
+  <div class="card"><h3>Интервалы</h3><div class="scroll"><table><tr><th>лады</th><th>название</th><th>от ${n(0)}</th></tr>
+    ${INT.map((t,i)=>`<tr><td>${i}</td><td>${t}</td><td>${n(0)} → ${n(i)}</td></tr>`).join('')}</table></div></div>
+  <div class="card"><h3>Как искать ноты на грифе</h3><ul>
+    <li>Один лад = полутон. Между ${n(4)}–${n(5)} и ${n(11)}–${n(0)} диеза нет, это сразу полутон.</li>
+    <li>12-й лад = открытая струна, дальше всё повторяется.</li>
+    <li>5-й лад = открытая соседняя струна (тоньше). Исключение: на 3-й струне это 4-й лад.</li>
+    <li>Октава: через одну струну к тонким и +2 лада. Если перескакиваешь 2-ю струну — +3 лада.</li>
+    <li>Опорные точки 6-й и 1-й струны: 0 ${n(4)}, 1 ${n(5)}, 3 ${n(7)}, 5 ${n(9)}, 7 ${n(11)}, 8 ${n(0)}, 10 ${n(2)}, 12 ${n(4)}.</li>
+    <li>5-я струна: 0 ${n(9)}, 2 ${n(11)}, 3 ${n(0)}, 5 ${n(2)}, 7 ${n(4)}, 8 ${n(5)}, 10 ${n(7)}, 12 ${n(9)}.</li></ul></div>
+  <div class="card"><h3>Чтение нот</h3><ul>
+    <li>Линии снизу вверх: ${[4,7,11,2,5].map(n).join(', ')}. Промежутки: ${[5,9,0,4].map(n).join(', ')}.</li>
+    <li>Гитарная партия пишется в скрипичном ключе на октаву выше, чем звучит (восьмёрка под ключом).</li>
+    <li>Открытая 6-я струна (${n(4)}) висит под третьей добавочной линейкой.</li>
+    <li>${n(0)} первой октавы (1-я добавочная снизу) — 2-я струна, 1-й лад.</li>
+    <li>Открытые струны на стане: ${[4,9,2,7,11,4].map(n).join(', ')} снизу вверх.</li></ul></div>
+  <div class="card"><h3>Строим гамму и аккорд</h3>
+    <p>Мажор: Т Т П Т Т Т П. Минор: Т П Т Т П Т Т. От ${n(0)} мажор даёт все белые клавиши.</p>
+    <p>Трезвучие = 1, 3 и 5 ступени. Большая терция (4 лада) снизу — мажор, малая (3 лада) — минор.</p>
+    <p>Пентатоника — та же гамма без «острых» полутонов: в миноре без 2 и 6, в мажоре без 4 и 7.</p></div>`;
+}
+
+/* ---------- controls ---------- */
+const ON={fretMode:nextFret,maxFret:nextFret,natural:nextFret,heat:renderFret,staffRange:nextStaff,notation:renderAll,label:renderTheory,sound:()=>{}};
+function syncControls(){
+  document.querySelectorAll('.seg').forEach(g=>{const k=g.dataset.key;g.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(String(S[k])===b.dataset.val)));});
+  document.querySelectorAll('.tog').forEach(b=>b.setAttribute('aria-pressed',String(!!S[b.dataset.key])));
+  document.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===S.tab)));
+  ['fret','staff','theory'].forEach(t=>$('#tab-'+t).hidden=t!==S.tab);
+}
+document.querySelectorAll('.seg').forEach(g=>g.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const k=g.dataset.key;S[k]=g.dataset.num?+b.dataset.val:b.dataset.val;save();syncControls();ON[k]&&ON[k]();}));
+document.querySelectorAll('.tog').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.key;S[k]=!S[k];save();syncControls();ON[k]&&ON[k]();}));
+document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>{S.tab=b.dataset.tab;save();syncControls();if(S.tab==='staff')fitClef();}));
+document.addEventListener('keydown',e=>{if(e.key!=='Enter'||e.target.closest('button'))return;if(S.tab==='fret'&&F.done&&!F.ok)nextFret();if(S.tab==='staff'&&T.done&&!T.ok)nextStaff();});
+let resetArm=false;
+$('#reset').addEventListener('click',e=>{if(!resetArm){resetArm=true;e.target.textContent='Точно сбросить? Нажми ещё раз';setTimeout(()=>{resetArm=false;e.target.textContent='Сбросить статистику';},4000);return;}
+  store.fret={};store.staff={};store.best=0;sess.streak=0;sess.total=0;sess.correct=0;save();renderStats();renderFret();resetArm=false;e.target.textContent='Статистика сброшена';});
+function renderAll(){renderFret();renderStaff();renderTheory();}
+
+syncControls(); renderStats(); nextFret(); nextStaff(); renderTheory();
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fitClef);
+</script>
