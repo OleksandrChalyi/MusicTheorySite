@@ -6,24 +6,29 @@
   <title>Теория · Гриф и ноты</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Rubik:wght@400;500;700&family=Caveat:wght@600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Rubik:wght@400;500;700&display=swap">
   <link rel="stylesheet" href="../css/style.css">
 </head>
 <body data-root="../" data-section="theory">
-  <main class="page narrow">
+  <main class="page">
     <h1>Теория</h1>
-    <p class="lead">Уроки идут по порядку: каждый опирается на предыдущий. Один урок — минут 10.</p>
-    <div class="list" id="lessonList"></div>
+    <p class="lead">Программа из семи сеансов. Каждый урок — свой фильм. Смотри по порядку: каждый опирается на предыдущий.</p>
+    <div class="lineup" id="lessonList"></div>
   </main>
 
   <script src="../js/core.js"></script>
+  <script src="../js/posters.js"></script>
   <script src="../js/layout.js"></script>
   <script>
+    // Lessons as a film festival lineup: one poster card per lesson.
     $('#lessonList').innerHTML = LESSONS.map((l, i) => `
-      <a class="list-item${store.visited[l.slug] ? ' done' : ''}" href="${l.slug}.html">
-        <span class="list-num" title="${store.visited[l.slug] ? 'Пройден' : ''}">${String(i + 1).padStart(2, '0')}</span>
-        <div><h3>${l.title}</h3><p>${l.desc}</p></div>
-        <span class="arrow">→</span>
+      <a class="reel ${reelTheme(l.film, i)}" href="${l.slug}.html">
+        <span class="art">${POSTERS[l.film || 'bass'].mini()}</span>
+        ${store.visited[l.slug] ? '<span class="seen">Просмотрено</span>' : ''}
+        <span class="num">${String(i + 1).padStart(2, '0')}</span>
+        <span class="film">${l.filmName || 'сеанс Басса'}</span>
+        <h3>${l.title}</h3>
+        <p>${l.desc}</p>
       </a>`).join('');
   </script>
 </body>

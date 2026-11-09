@@ -1,35 +1,60 @@
 /* ==========================================================
-   Layout: site header, lesson/game catalogue, lesson pager.
+   Layout: header, lesson posters, hand-cut titles, pager.
    Every page sets <body data-root="../" data-section="theory" data-lesson="staff">.
+   Lesson pages load js/posters.js before this file.
    ========================================================== */
 
 const LESSONS = [
-  { slug: 'staff', title: 'Нотный стан и ключи', desc: 'Пять линеек, скрипичный и басовый ключ, где записывается гитара.' },
-  { slug: 'notes', title: 'Названия нот', desc: 'Семь нот, октавы, тон и полутон, диезы и бемоли.' },
-  { slug: 'rhythm', title: 'Длительности и ритм', desc: 'Целые, половинные, четверти, восьмые. Такт и размер.' },
-  { slug: 'intervals', title: 'Интервалы', desc: 'Расстояние между двумя нотами: от секунды до октавы.' },
-  { slug: 'scales', title: 'Гаммы', desc: 'Мажор, минор, пентатоника — из чего они строятся.' },
-  { slug: 'chords', title: 'Аккорды', desc: 'Трезвучия, септаккорды и аккорды тональности.' },
-  { slug: 'fretboard', title: 'Ноты на грифе', desc: 'Как быстро находить любую ноту, гаммы и аккорды на гитаре.' },
+  { slug: 'staff', title: 'Нотный стан и ключи', desc: 'Пять линеек, скрипичный и басовый ключ, где записывается гитара.', film: 'psycho', filmName: 'в духе «Психо»' },
+  { slug: 'notes', title: 'Названия нот', desc: 'Семь нот, октавы, тон и полутон, диезы и бемоли.', film: 'clockwork', filmName: 'в духе «Заводного апельсина»' },
+  { slug: 'rhythm', title: 'Длительности и ритм', desc: 'Целые, половинные, четверти, восьмые. Такт и размер.', film: 'whiplash', filmName: 'в духе «Одержимости»' },
+  { slug: 'intervals', title: 'Интервалы', desc: 'Расстояние между двумя нотами: от секунды до октавы.', film: 'alien', filmName: 'в духе «Чужого»' },
+  { slug: 'scales', title: 'Гаммы', desc: 'Мажор, минор, пентатоника — из чего они строятся.', film: 'shining', filmName: 'в духе «Сияния»' },
+  { slug: 'chords', title: 'Аккорды', desc: 'Трезвучия, септаккорды и аккорды тональности.', film: 'anatomy', filmName: 'в духе «Анатомии убийства»' },
+  { slug: 'fretboard', title: 'Ноты на грифе', desc: 'Как быстро находить любую ноту, гаммы и аккорды на гитаре.', film: 'odyssey', filmName: 'в духе «Космической одиссеи 2001»' },
 ];
 
 const GAMES = [
-  { slug: 'guess-note', title: 'Угадай ноту', desc: 'На грифе отмечен лад — назови ноту.', icon: '🎯' },
-  { slug: 'find-note', title: 'Найди на грифе', desc: 'Дана нота и струна — нажми нужный лад.', icon: '🔍' },
-  { slug: 'read-staff', title: 'Читай ноты', desc: 'Нота на нотном стане — назови её и найди на гитаре.', icon: '🎼' },
+  { slug: 'guess-note', title: 'Угадай ноту', desc: 'На грифе отмечен лад — назови ноту.' },
+  { slug: 'find-note', title: 'Найди на грифе', desc: 'Дана нота и струна — нажми нужный лад.' },
+  { slug: 'read-staff', title: 'Читай ноты', desc: 'Нота на нотном стане — назови её и найди на гитаре.' },
 ];
 
-/** SVG filters used by CSS (filter: url(#rough)) for painterly, brush-like edges. */
-function injectFilters() {
-  const defs = document.createElement('div');
-  defs.innerHTML = `
-    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-      <filter id="rough" x="-10%" y="-30%" width="120%" height="160%">
-        <feTurbulence type="fractalNoise" baseFrequency="0.035 0.09" numOctaves="3" seed="7"/>
-        <feDisplacementMap in="SourceGraphic" scale="10"/>
-      </filter>
-    </svg>`;
-  document.body.prepend(defs.firstElementChild);
+/** Colour theme for a list card: film theme, or one of three Bass colourways. */
+const reelTheme = (film, i) => (film ? 't-' + film : 't-bass' + ((i % 3) + 1));
+
+/**
+ * Hand-cut lettering: every letter slightly rotated and shifted, like Saul Bass titles.
+ * Seeded by the text, so a title always looks the same. Keeps child elements (e.g. <span class="dark">).
+ */
+function cutLetters(el, strength = 1) {
+  const rnd = seededRandom(el.textContent);
+  const walk = node => {
+    [...node.childNodes].forEach(child => {
+      if (child.nodeType === Node.ELEMENT_NODE) { walk(child); return; }
+      if (child.nodeType !== Node.TEXT_NODE || !child.textContent.trim()) return;
+      const frag = document.createDocumentFragment();
+      child.textContent.split(/(\s+)/).forEach(part => {
+        if (!part) return;
+        if (/^\s+$/.test(part)) { frag.append(' '); return; }
+        const word = document.createElement('span');
+        word.className = 'cutword';
+        [...part].forEach(ch => {
+          const s = document.createElement('span');
+          s.className = 'cutletter';
+          s.textContent = ch;
+          const rot = ((rnd() - 0.5) * 9 * strength).toFixed(1);
+          const dy = ((rnd() - 0.5) * 0.08 * strength).toFixed(3);
+          s.style.transform = `rotate(${rot}deg) translateY(${dy}em)`;
+          word.append(s);
+        });
+        frag.append(word);
+      });
+      child.replaceWith(frag);
+    });
+  };
+  el.setAttribute('aria-label', el.textContent.trim());
+  walk(el);
 }
 
 function renderHeader() {
@@ -56,6 +81,31 @@ function renderHeader() {
   bindControls(header);
 }
 
+/** Wrap the lesson's crumbs, title and lead into its film poster. */
+function renderLessonPoster() {
+  const slug = document.body.dataset.lesson;
+  if (!slug || typeof POSTERS === 'undefined') return;
+  const i = LESSONS.findIndex(l => l.slug === slug);
+  const lesson = LESSONS[i];
+  const film = lesson.film || 'bass';
+  const def = POSTERS[film];
+  if (lesson.film) document.body.dataset.film = lesson.film;
+
+  const crumbs = $('.crumbs');
+  if (crumbs) crumbs.innerHTML = `<a href="index.html">Теория</a> · Урок ${i + 1} из ${LESSONS.length}`;
+
+  const poster = document.createElement('section');
+  poster.className = `poster poster--${film}`;
+  poster.innerHTML = `<div class="poster-art">${def.art()}</div>`;
+  [crumbs, $('main > h1'), $('main > .lead')].forEach(el => el && poster.append(el));
+  const tag = document.createElement('p');
+  tag.className = 'tagline';
+  tag.textContent = (lesson.filmName ? lesson.filmName + ' · ' : '') + def.tagline;
+  poster.append(tag);
+  $('main').prepend(poster);
+  if (def.cutTitle) cutLetters($('h1', poster));
+}
+
 /** Prev / next links at the bottom of a lesson; also marks the lesson as visited. */
 function renderLessonPager() {
   const slug = document.body.dataset.lesson;
@@ -73,11 +123,9 @@ function renderLessonPager() {
     (next ? `<a class="next" href="${next.slug}.html"><small>Урок ${i + 2} →</small>${next.title}</a>`
           : `<a class="next" href="../games/index.html"><small>Дальше →</small>Закрепить в играх</a>`);
   $('main').append(pager);
-
-  const crumbs = $('.crumbs');
-  if (crumbs) crumbs.innerHTML = `<a href="index.html">Теория</a> · Урок ${i + 1} из ${LESSONS.length}`;
 }
 
-injectFilters();
 renderHeader();
+renderLessonPoster();
 renderLessonPager();
+$$('.page > h1, .game-head h1').forEach(h => cutLetters(h, 0.7));

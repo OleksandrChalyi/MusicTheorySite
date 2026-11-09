@@ -6,24 +6,28 @@
   <title>Игры · Гриф и ноты</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Rubik:wght@400;500;700&family=Caveat:wght@600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Rubik:wght@400;500;700&display=swap">
   <link rel="stylesheet" href="../css/style.css">
 </head>
 <body data-root="../" data-section="games">
-  <main class="page narrow">
+  <main class="page">
     <h1>Игры</h1>
-    <p class="lead">Короткие тренажёры. Выбери один и играй, пока серия не станет больше 10.</p>
-    <div class="list" id="gameList"></div>
+    <p class="lead">Короткие тренажёры. Выбери сеанс и играй, пока серия не станет больше 10.</p>
+    <div class="lineup" id="gameList"></div>
   </main>
 
   <script src="../js/core.js"></script>
+  <script src="../js/posters.js"></script>
   <script src="../js/layout.js"></script>
   <script>
     $('#gameList').innerHTML = GAMES.map((g, i) => `
-      <a class="list-item" href="${g.slug}.html">
-        <span class="list-num">${String(i + 1).padStart(2, '0')}</span>
-        <div><h3>${g.title}</h3><p>${g.desc}</p></div>
-        <span class="badge">${store.best[g.slug] ? 'рекорд ' + store.best[g.slug] : '→'}</span>
+      <a class="reel ${reelTheme(null, i)}" href="${g.slug}.html">
+        <span class="art">${POSTERS.bass.mini()}</span>
+        ${store.best[g.slug] ? `<span class="seen">Рекорд ${store.best[g.slug]}</span>` : ''}
+        <span class="num">${String(i + 1).padStart(2, '0')}</span>
+        <span class="film">Игра</span>
+        <h3>${g.title}</h3>
+        <p>${g.desc}</p>
       </a>`).join('');
   </script>
 </body>
