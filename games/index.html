@@ -21,11 +21,11 @@
   <script src="../js/layout.js"></script>
   <script>
     $('#gameList').innerHTML = GAMES.map((g, i) => `
-      <a class="reel ${reelTheme(null, i)}" href="${g.slug}.html">
-        <span class="art">${POSTERS.bass.mini()}</span>
+      <a class="reel ${reelTheme(g.film, i)}" href="${g.slug}.html">
+        <span class="art">${POSTERS[g.film].mini()}</span>
         ${store.best[g.slug] ? `<span class="seen">Рекорд ${store.best[g.slug]}</span>` : ''}
         <span class="num">${String(i + 1).padStart(2, '0')}</span>
-        <span class="film">Игра</span>
+        <span class="film">${g.filmName}</span>
         <h3>${g.title}</h3>
         <p>${g.desc}</p>
       </a>`).join('');

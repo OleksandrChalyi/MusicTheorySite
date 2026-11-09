@@ -15,9 +15,9 @@ const LESSONS = [
 ];
 
 const GAMES = [
-  { slug: 'guess-note', title: 'Угадай ноту', desc: 'На грифе отмечен лад — назови ноту.' },
-  { slug: 'find-note', title: 'Найди на грифе', desc: 'Дана нота и струна — нажми нужный лад.' },
-  { slug: 'read-staff', title: 'Читай ноты', desc: 'Нота на нотном стане — назови её и найди на гитаре.' },
+  { slug: 'guess-note', title: 'Угадай ноту', desc: 'На грифе отмечен лад — назови ноту.', film: 'suspects', filmName: 'в духе «Подозрительных лиц»' },
+  { slug: 'find-note', title: 'Найди на грифе', desc: 'Дана нота и струна — нажми нужный лад.', film: 'nxnw', filmName: 'в духе «К северу через северо-запад»' },
+  { slug: 'read-staff', title: 'Читай ноты', desc: 'Нота на нотном стане — назови её и найди на гитаре.', film: 'metropolis', filmName: 'в духе «Метрополиса»' },
 ];
 
 /** Colour theme for a list card: film theme, or one of three Bass colourways. */
@@ -89,7 +89,7 @@ function renderLessonPoster() {
   const lesson = LESSONS[i];
   const film = lesson.film || 'bass';
   const def = POSTERS[film];
-  if (lesson.film) document.body.dataset.film = lesson.film;
+  if (lesson.film) setFilm(lesson.film);
 
   const crumbs = $('.crumbs');
   if (crumbs) crumbs.innerHTML = `<a href="index.html">Теория</a> · Урок ${i + 1} из ${LESSONS.length}`;
@@ -104,6 +104,56 @@ function renderLessonPoster() {
   poster.append(tag);
   $('main').prepend(poster);
   if (def.cutTitle) cutLetters($('h1', poster));
+}
+
+/** Same idea for a game page (<body data-game="guess-note">): crumbs + title + stats go into the poster. */
+function renderGamePoster() {
+  const slug = document.body.dataset.game;
+  if (!slug || typeof POSTERS === 'undefined') return;
+  const game = GAMES.find(g => g.slug === slug);
+  const def = POSTERS[game.film];
+  setFilm(game.film);
+
+  const poster = document.createElement('section');
+  poster.className = `poster poster--game poster--${game.film}`;
+  poster.innerHTML = `<div class="poster-art">${def.art()}</div>`;
+  // Title goes into the poster; the score stays below it, next to the settings.
+  [$('main > .crumbs'), $('.game-head h1')].forEach(el => el && poster.append(el));
+  const tag = document.createElement('p');
+  tag.className = 'tagline';
+  tag.textContent = `${game.filmName} · ${def.tagline}`;
+  poster.append(tag);
+  $('main').prepend(poster);
+  if (def.cutTitle) cutLetters($('h1', poster), 0.8);
+}
+
+/** Switch the page to a film's colours and draw its graphics in the side margins. */
+function setFilm(film) {
+  document.documentElement.dataset.film = film;
+  const backdrop = typeof BACKDROPS !== 'undefined' && BACKDROPS[film];
+  if (!backdrop) return;
+  const { left, right } = backdrop();
+  const bg = document.createElement('div');
+  bg.className = 'film-bg';
+  bg.setAttribute('aria-hidden', 'true');
+  const side = (cls, inner) =>
+    `<svg class="${cls}" viewBox="0 0 200 900" preserveAspectRatio="xMidYMid slice">${inner}</svg>`;
+  bg.innerHTML = side('bg-left', left) + side('bg-right', right);
+  document.body.prepend(bg);
+
+  // Gentle parallax: the side graphics drift slower than the page.
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const svgs = $$('svg', bg);
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      const y = -window.scrollY * 0.12;
+      svgs.forEach((s, i) => { s.style.transform = `translateY(${(i ? y * 1.4 : y).toFixed(1)}px)`; });
+      ticking = false;
+    });
+  }, { passive: true });
 }
 
 /** Prev / next links at the bottom of a lesson; also marks the lesson as visited. */
@@ -127,5 +177,6 @@ function renderLessonPager() {
 
 renderHeader();
 renderLessonPoster();
+renderGamePoster();
 renderLessonPager();
-$$('.page > h1, .game-head h1').forEach(h => cutLetters(h, 0.7));
+$$('.page > h1').forEach(h => cutLetters(h, 0.7));

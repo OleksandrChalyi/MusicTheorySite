@@ -3,7 +3,7 @@
    Flat cut paper, 2–3 colours, hand-cut lettering.
 
    Every page shares the layout and components. A film page only
-   overrides the colour variables below via body[data-film]
+   overrides the colour variables below via <html data-film>
    and gets its own poster at the top (see js/posters.js).
    ========================================================== */
 
@@ -33,42 +33,57 @@
 }
 
 /* ---------- film themes (only colours change) ---------- */
-body[data-film="psycho"] {
+[data-film="psycho"] {
   --bg: #161616; --text: #ece8df; --muted: #9b968d; --panel: #222;
   --line: #ece8df; --accent: #d8d3c6; --on-accent: #111;
   color-scheme: dark;
 }
-body[data-film="alien"] {
+[data-film="alien"] {
   --bg: #070908; --text: #cdd8cf; --muted: #6f7f75; --panel: #0f1513;
   --line: #2f3c36; --accent: #9be8b9; --on-accent: #06110b;
   color-scheme: dark;
 }
-body[data-film="clockwork"] {
+[data-film="clockwork"] {
   --bg: #f4f1ea; --text: #111; --muted: #6b6660; --panel: #e6e1d5;
   --line: #111; --accent: #f26a1b; --on-accent: #111;
 }
-body[data-film="whiplash"] {
+[data-film="whiplash"] {
   --bg: #0d0c08; --text: #f2ead2; --muted: #a59c80; --panel: #1b1910;
   --line: #f2c40f; --accent: #f2c40f; --on-accent: #111;
   color-scheme: dark;
 }
-body[data-film="shining"] {
+[data-film="shining"] {
   --bg: #1d0f0b; --text: #f1e6cf; --muted: #b39883; --panel: #2c1712;
   --line: #8a3a22; --accent: #e0622a; --on-accent: #1d0f0b;
   color-scheme: dark;
 }
-body[data-film="anatomy"] { /* base Bass colours */ }
-body[data-film="odyssey"] {
+[data-film="anatomy"] { /* base Bass colours */ }
+[data-film="odyssey"] {
   --bg: #efeeea; --text: #111; --muted: #6d6d68; --panel: #e0dfd9;
   --line: #111; --accent: #c8201b; --on-accent: #fff;
 }
+[data-film="suspects"] {
+  --bg: #12171c; --text: #e6e1d5; --muted: #8f9aa3; --panel: #1e252c;
+  --line: #e6e1d5; --accent: #e3a33c; --on-accent: #12171c;
+  color-scheme: dark;
+}
+[data-film="nxnw"] {
+  --bg: #0e231c; --text: #eaf2ea; --muted: #8fb3a3; --panel: #163329;
+  --line: #eaf2ea; --accent: #e8e2cf; --on-accent: #0e231c;
+  color-scheme: dark;
+}
+[data-film="metropolis"] {
+  --bg: #0b0906; --text: #efe3c4; --muted: #a8946a; --panel: #19140c;
+  --line: #d4a64a; --accent: #d4a64a; --on-accent: #0b0906;
+  color-scheme: dark;
+}
 
 * { box-sizing: border-box; }
+/* the page colour lives on <html>, so the fixed film backdrop (z-index: -1) shows through <body> */
 html { background: var(--bg); }
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--bg);
   color: var(--text);
   font-family: var(--f-body);
   font-size: 16px;
@@ -296,56 +311,49 @@ p { margin: 0 0 14px; }
 .poster--odyssey h1 { font-weight: 500; letter-spacing: 0.3em; font-size: clamp(30px, 6vw, 54px); }
 .poster--odyssey .crumbs { background: #111; color: #f7f6f2; }
 
-/* page-edge motifs */
-body[data-film="clockwork"]::before {
-  content: ""; position: fixed; right: -70px; top: 38%; width: 150px; height: 150px;
-  border-radius: 50%; background: #f26a1b; pointer-events: none; z-index: -1;
-}
-body[data-film="whiplash"]::before {
-  content: ""; position: fixed; left: 0; top: 0; bottom: 0; width: 10px;
-  background: repeating-linear-gradient(#f2c40f 0 26px, transparent 26px 52px);
-  opacity: 0.5; pointer-events: none;
-}
-body[data-film="shining"]::before {
-  content: ""; position: fixed; right: 0; top: 0; bottom: 0; width: 16px;
-  background: repeating-linear-gradient(60deg, #d6532a 0 8px, #6d2414 8px 16px, #f1e6cf 16px 18px, #6d2414 18px 26px);
-  opacity: 0.5; pointer-events: none;
-}
-body[data-film="anatomy"]::before {
-  content: ""; position: fixed; left: 6px; top: 0; bottom: 0; width: 8px;
-  background: repeating-linear-gradient(#141210 0 60px, transparent 60px 78px, #141210 78px 104px, transparent 104px 130px);
-  opacity: 0.35; pointer-events: none;
-}
-body[data-film="odyssey"]::before {
+/* ---------- film backdrop: graphics in the side margins (js: renderBackdrop) ---------- */
+.film-bg { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+.film-bg svg { position: absolute; top: 0; height: 100%; width: max(110px, calc((100vw - 880px) / 2)); will-change: transform; }
+.film-bg .bg-left { left: 0; }
+.film-bg .bg-right { right: 0; }
+.film-bg .beat { animation: beatBg 2s steps(1) infinite; }
+@keyframes beatBg { 0% { opacity: 1; } 25%, 100% { opacity: 0.35; } }
+@media (max-width: 1100px) { .film-bg { opacity: 0.4; } }
+@media (max-width: 600px) { .film-bg { opacity: 0.22; } }
+
+/* 2001: HAL's red eye watches from the corner */
+[data-film="odyssey"] body::after {
   content: ""; position: fixed; right: 22px; bottom: 22px; width: 14px; height: 14px; border-radius: 50%;
   background: #c8201b; box-shadow: 0 0 0 6px rgba(200, 32, 27, 0.15), 0 0 18px 4px rgba(200, 32, 27, 0.35);
   pointer-events: none; z-index: 30;
 }
-body[data-film="psycho"]::before {
-  content: "";
-  position: fixed;
-  left: 0; top: 0; bottom: 0;
-  width: 14px;
-  background: repeating-linear-gradient(#d8d3c6 0 10px, transparent 10px 34px);
-  opacity: 0.3;
-  pointer-events: none;
-}
-body[data-film="alien"]::before {
-  content: "";
-  position: fixed;
-  right: 18px; top: 0; bottom: 0;
-  width: 2px;
-  background: linear-gradient(transparent, #9be8b9 30%, #9be8b9 70%, transparent);
-  box-shadow: 0 0 14px 2px rgba(155, 232, 185, 0.45);
-  opacity: 0.55;
-  pointer-events: none;
-}
+
+/* ---------- game films ---------- */
+.poster--game { min-height: 300px; margin-bottom: 18px; }
+.poster--game h1 { transform: rotate(-1.5deg); }
+.page > .game-head { justify-content: flex-end; }
+.poster--suspects { --p-bg: #20272e; --p-text: #e6e1d5; }
+.poster--suspects .crumbs { background: #e3a33c; color: #12171c; }
+.poster--nxnw { --p-bg: #2f8a6b; --p-text: #eaf2ea; }
+.poster--nxnw .crumbs { background: #141210; color: #eaf2ea; }
+.poster--metropolis { --p-bg: #0b0906; --p-text: #efe3c4; }
+.poster--metropolis h1 { font-weight: 500; letter-spacing: 0.22em; color: #d4a64a; }
+.poster--metropolis .crumbs { background: #d4a64a; color: #0b0906; }
+
+[data-film="suspects"] .stage { background: #2b333b; }
+[data-film="nxnw"] .stage { background: #246f56; }
+[data-film="metropolis"] .stage { background: #1d1810; --muted: #c2ab78; }
+[data-film="metropolis"] .stage .question { letter-spacing: 0.08em; color: #d4a64a; }
+
+.reel.t-suspects { --r-bg: #20272e; --r-text: #e6e1d5; --r-accent: #e3a33c; }
+.reel.t-nxnw { --r-bg: #2f8a6b; --r-text: #eaf2ea; --r-accent: #141210; }
+.reel.t-metropolis { --r-bg: #0b0906; --r-text: #efe3c4; --r-accent: #d4a64a; }
 
 /* ---------- lesson content ---------- */
 .lesson h2 { margin: 54px 0 14px; scroll-margin-top: 90px; display: flex; align-items: center; gap: 12px; }
 .lesson h2::before { content: ""; flex: none; width: 18px; height: 18px; background: var(--accent); clip-path: var(--cut2); }
-body[data-film="alien"] .lesson h2 { font-weight: 500; letter-spacing: 0.16em; }
-body[data-film="alien"] .lesson h2::before { width: 2px; height: 26px; box-shadow: 0 0 10px var(--accent); clip-path: none; }
+[data-film="alien"] .lesson h2 { font-weight: 500; letter-spacing: 0.16em; }
+[data-film="alien"] .lesson h2::before { width: 2px; height: 26px; box-shadow: 0 0 10px var(--accent); clip-path: none; }
 .lesson ul { padding-left: 22px; margin: 0 0 14px; }
 .lesson li { margin-bottom: 7px; }
 .lesson li::marker { color: var(--accent); }
@@ -574,6 +582,6 @@ tr.clickable[aria-selected="true"] td.muted { color: inherit; opacity: 0.75; }
   .pager a { font-size: 17px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .cover-spiral, .cover-figure, .psycho-bar, .psycho-note, .alien-crack, .alien-stars circle, .poster--whiplash .beat, .verdict { animation: none; }
+  .cover-spiral, .cover-figure, .psycho-bar, .psycho-note, .alien-crack, .alien-stars circle, .poster--whiplash .beat, .film-bg .beat, .verdict { animation: none; }
   .session, .reel, .answer, .pager a { transition: none; }
 }

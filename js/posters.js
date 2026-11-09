@@ -190,6 +190,199 @@ const POSTERS = {
     },
     mini: () => `<svg viewBox="0 0 240 230" preserveAspectRatio="xMaxYMin slice" aria-hidden="true"><circle cx="190" cy="-60" r="90" fill="#111"/><circle cx="190" cy="42" r="6" fill="#111"/><rect x="172" y="60" width="36" height="170" fill="#111"/></svg>`,
   },
+
+  /* ---------- games ---------- */
+
+  // The Usual Suspects: a police lineup of notes against a height chart. Which one is it?
+  suspects: {
+    tagline: 'Кто такая эта нота?',
+    cutTitle: true,
+    art: () => {
+      let chart = '';
+      for (let i = 0; i < 9; i++) {
+        const y = 40 + i * 34;
+        chart += `<rect x="420" y="${y}" width="380" height="2" fill="#e6e1d5" opacity="0.35"/>` +
+                 `<text x="790" y="${y - 6}" text-anchor="end" fill="#e6e1d5" opacity="0.5" font-family="Oswald" font-size="12">${200 - i * 10}</text>`;
+      }
+      const suspect = (x, h, color, mark) => `
+        <g transform="translate(${x} ${318 - h})" fill="${color}">
+          <rect x="22" y="0" width="7" height="${h - 30}"/>
+          <path d="M29 0 C 44 14 52 22 46 42 L 40 40 C 44 26 38 18 29 12 Z"/>
+          <ellipse cx="14" cy="${h - 26}" rx="18" ry="13" transform="rotate(-22 14 ${h - 26})"/>
+          ${mark ? `<text x="14" y="${h - 60}" text-anchor="middle" fill="#20272e" font-family="Oswald" font-weight="700" font-size="22">${mark}</text>` : ''}
+        </g>`;
+      return `
+      <svg viewBox="0 0 800 380" preserveAspectRatio="xMaxYMid slice" aria-hidden="true">
+        ${chart}
+        ${suspect(460, 230, '#e6e1d5')}${suspect(530, 290, '#e6e1d5')}${suspect(600, 250, '#e3a33c', '')}${suspect(670, 310, '#e6e1d5')}${suspect(740, 220, '#e6e1d5')}
+        <text x="614" y="70" text-anchor="middle" fill="#e3a33c" font-family="Oswald" font-weight="700" font-size="54">?</text>
+      </svg>`;
+    },
+    mini: () => `<svg viewBox="0 0 240 230" preserveAspectRatio="xMaxYMin slice" aria-hidden="true"><g fill="#e6e1d5" opacity="0.35">
+      <rect x="100" y="30" width="140" height="2"/><rect x="100" y="60" width="140" height="2"/><rect x="100" y="90" width="140" height="2"/><rect x="100" y="120" width="140" height="2"/></g>
+      <g fill="#e3a33c"><rect x="186" y="40" width="5" height="90"/><ellipse cx="178" cy="132" rx="12" ry="9"/></g></svg>`,
+  },
+
+  // North by Northwest: Bass's title grid — slanted lines like a fretboard seen in perspective.
+  nxnw: {
+    tagline: 'Ищи по струнам: на север, на северо-запад',
+    cutTitle: true,
+    art: () => {
+      let grid = '';
+      for (let i = 0; i < 14; i++) grid += `<line x1="${380 + i * 34}" y1="0" x2="${300 + i * 34}" y2="380" stroke="#eaf2ea" stroke-width="2" opacity="0.55"/>`;
+      for (let i = 0; i < 6; i++) grid += `<line x1="380" y1="${50 + i * 52}" x2="800" y2="${20 + i * 52}" stroke="#eaf2ea" stroke-width="${i === 2 ? 5 : 2}" opacity="${i === 2 ? 0.95 : 0.55}"/>`;
+      return `
+      <svg viewBox="0 0 800 380" preserveAspectRatio="xMaxYMid slice" aria-hidden="true">
+        <polygon points="430,0 800,0 800,380 350,380" fill="#246f56"/>
+        ${grid}
+        <polygon points="640,140 700,158 640,176" fill="#141210"/>
+        <polygon points="700,130 760,112 744,96 800,92 776,146 762,128" fill="#141210"/>
+        <circle cx="584" cy="155" r="13" fill="#e0572a"/>
+      </svg>`;
+    },
+    mini: () => `<svg viewBox="0 0 240 230" preserveAspectRatio="xMaxYMin slice" aria-hidden="true"><g stroke="#eaf2ea" stroke-width="2" opacity="0.5">
+      <line x1="120" y1="0" x2="90" y2="230"/><line x1="150" y1="0" x2="120" y2="230"/><line x1="180" y1="0" x2="150" y2="230"/><line x1="210" y1="0" x2="180" y2="230"/>
+      <line x1="80" y1="60" x2="240" y2="44"/><line x1="80" y1="100" x2="240" y2="84"/></g><circle cx="166" cy="78" r="8" fill="#e0572a"/></svg>`,
+  },
+
+  // Metropolis: Art Deco — gold sunburst and a city whose towers grow out of the staff.
+  metropolis: {
+    tagline: 'Между нотой и пальцами должно быть сердце',
+    cutTitle: false,
+    art: () => {
+      let rays = '';
+      for (let i = 0; i < 13; i++) {
+        const a = Math.PI + (i / 12) * Math.PI;
+        rays += `<polygon points="620,380 ${(620 + Math.cos(a - 0.05) * 520).toFixed(0)},${(380 + Math.sin(a - 0.05) * 520).toFixed(0)} ${(620 + Math.cos(a + 0.05) * 520).toFixed(0)},${(380 + Math.sin(a + 0.05) * 520).toFixed(0)}" fill="#d4a64a" opacity="0.18"/>`;
+      }
+      const tower = (x, w, h) => `<polygon points="${x},380 ${x},${380 - h} ${x + w * 0.2},${380 - h} ${x + w * 0.2},${370 - h - 20} ${x + w * 0.8},${370 - h - 20} ${x + w * 0.8},${380 - h} ${x + w},${380 - h} ${x + w},380" fill="#0b0906" stroke="#d4a64a" stroke-width="2"/>`;
+      let lines = '';
+      for (let i = 0; i < 5; i++) lines += `<rect x="430" y="${300 + i * 12}" width="370" height="2" fill="#d4a64a" opacity="0.7"/>`;
+      return `
+      <svg viewBox="0 0 800 380" preserveAspectRatio="xMaxYMid slice" aria-hidden="true">
+        ${rays}
+        <circle cx="620" cy="380" r="70" fill="none" stroke="#d4a64a" stroke-width="3"/>
+        ${tower(470, 50, 180)}${tower(530, 60, 250)}${tower(600, 44, 300)}${tower(654, 64, 220)}${tower(728, 50, 160)}
+        ${lines}
+      </svg>`;
+    },
+    mini: () => `<svg viewBox="0 0 240 230" preserveAspectRatio="xMaxYMax slice" aria-hidden="true"><g fill="none" stroke="#d4a64a" stroke-width="2">
+      <polygon points="140,230 140,120 150,120 150,100 166,100 166,120 176,120 176,230"/><polygon points="184,230 184,80 194,80 194,60 214,60 214,80 224,80 224,230"/></g></svg>`,
+  },
+};
+
+/* ==========================================================
+   Backdrops: film graphics in the side margins of a page,
+   left and right of the content column (viewBox 200 × 900).
+   ========================================================== */
+const BACKDROPS = {
+  psycho: () => {
+    const bars = (mirror, rnd) => {
+      let out = '';
+      [90, 470].forEach(top => {
+        for (let i = 0; i < 5; i++) {
+          const w = 90 + rnd() * 110;
+          out += `<rect x="${mirror ? 200 - w : 0}" y="${top + i * 26}" width="${w.toFixed(0)}" height="13" fill="#d8d3c6" opacity="0.22"/>`;
+        }
+      });
+      return out;
+    };
+    const rnd = seededRandom('psycho-bg');
+    return { left: bars(false, rnd), right: bars(true, rnd) };
+  },
+
+  alien: () => {
+    const rnd = seededRandom('alien-bg');
+    const stars = () => {
+      let s = '';
+      for (let i = 0; i < 70; i++) s += `<circle cx="${(rnd() * 200).toFixed(0)}" cy="${(rnd() * 900).toFixed(0)}" r="${(rnd() * 1.4 + 0.3).toFixed(1)}" fill="#cdd8cf" opacity="${(rnd() * 0.5 + 0.15).toFixed(2)}"/>`;
+      return s;
+    };
+    return {
+      left: stars() + '<circle cx="40" cy="640" r="7" fill="#9be8b9" opacity="0.5"/>',
+      right: stars() + '<polygon points="120,0 126,180 116,360 128,540 118,720 124,900 128,900 122,720 132,540 120,360 130,180 124,0" fill="#9be8b9" opacity="0.35"/>',
+    };
+  },
+
+  clockwork: () => {
+    let keys = '';
+    for (let i = 0; i < 16; i++) keys += `<rect x="110" y="${120 + i * 30}" width="80" height="29" fill="#f4f1ea" stroke="#111" stroke-width="2"/>`;
+    [0, 1, 3, 4, 5, 7, 8, 10, 11, 12, 14].forEach(i => { keys += `<rect x="110" y="${140 + i * 30}" width="46" height="18" fill="#111"/>`; });
+    return {
+      left: '<polygon points="0,480 200,900 0,900" fill="#111"/><circle cx="60" cy="230" r="44" fill="none" stroke="#111" stroke-width="3"/>',
+      right: keys + '<circle cx="200" cy="760" r="90" fill="#f26a1b"/>',
+    };
+  },
+
+  whiplash: () => ({
+    left: '<circle cx="40" cy="300" r="130" fill="none" stroke="#f2c40f" stroke-width="3" opacity="0.4"/><circle cx="40" cy="300" r="100" fill="none" stroke="#f2c40f" stroke-width="1.5" opacity="0.3"/><circle cx="60" cy="720" r="70" fill="#f2c40f" opacity="0.12"/>',
+    right: `<rect x="90" y="120" width="8" height="300" fill="#f4ecd2" opacity="0.5" transform="rotate(-20 94 270)"/>
+            <rect x="130" y="120" width="8" height="300" fill="#f4ecd2" opacity="0.5" transform="rotate(16 134 270)"/>
+            <g fill="#f2c40f" opacity="0.6"><rect class="beat" x="90" y="620" width="26" height="34"/><rect class="beat" x="90" y="664" width="26" height="34" style="animation-delay:.5s"/>
+            <rect class="beat" x="90" y="708" width="26" height="34" style="animation-delay:1s"/><rect class="beat" x="90" y="752" width="26" height="34" style="animation-delay:1.5s"/></g>`,
+  }),
+
+  shining: () => {
+    const carpet = id => `<defs><pattern id="${id}" width="60" height="104" patternUnits="userSpaceOnUse"><g id="${id}c">
+      <path d="M30 0 L60 17 L60 52 L30 69 L0 52 L0 17Z" fill="#d6532a"/><path d="M30 13 L49 24 L49 45 L30 56 L11 45 L11 24Z" fill="#6d2414"/>
+      <path d="M30 25 L39 30 L39 39 L30 44 L21 39 L21 30Z" fill="#f1e6cf"/></g><use href="#${id}c" x="-30" y="52"/><use href="#${id}c" x="30" y="52"/></pattern></defs>`;
+    return {
+      left: carpet('carpetL') + '<polygon points="0,0 120,0 70,900 0,900" fill="url(#carpetL)" opacity="0.55"/>',
+      right: carpet('carpetR') + '<polygon points="130,0 200,0 200,900 80,900" fill="url(#carpetR)" opacity="0.55"/>',
+    };
+  },
+
+  anatomy: () => ({
+    left: `<g fill="#141210" opacity="0.85">
+      <polygon points="40,120 56,118 58,220 42,222" transform="rotate(8 50 170)"/><polygon points="44,240 60,238 62,320 46,322" transform="rotate(-6 52 280)"/>
+      <polygon points="20,400 60,380 104,388 112,412 84,434 42,436 14,420"/><polygon points="40,520 76,500 120,508 128,532 100,554 58,556 30,540" transform="rotate(10 80 528)"/></g>`,
+    right: `<rect x="100" y="0" width="100" height="900" fill="#e0572a"/><g fill="#141210">
+      <polygon points="120,260 168,300 162,336 148,310 122,292"/><polygon points="110,640 146,620 190,628 198,652 170,674 128,676 100,660"/></g>`,
+  }),
+
+  odyssey: () => ({
+    left: '<circle cx="80" cy="-60" r="160" fill="#111" opacity="0.9"/><circle cx="80" cy="150" r="14" fill="#111"/><circle cx="80" cy="118" r="7" fill="#111"/><rect x="0" y="860" width="200" height="40" fill="#111"/>',
+    right: `<rect x="110" y="340" width="56" height="560" fill="#0b0b0b"/>${[...Array(14).keys()].map(i => `<rect x="110" y="${370 + i * 34}" width="56" height="2" fill="#3a3a3a"/>`).join('')}`,
+  }),
+
+  suspects: () => {
+    const chart = mirror => {
+      let s = '';
+      for (let i = 0; i < 24; i++) {
+        const y = 40 + i * 36;
+        s += `<rect x="0" y="${y}" width="200" height="2" fill="#e6e1d5" opacity="0.18"/>`;
+        if (i % 2 === 0) s += `<text x="${mirror ? 10 : 190}" y="${y - 6}" text-anchor="${mirror ? 'start' : 'end'}" fill="#e6e1d5" opacity="0.35" font-family="Oswald" font-size="13">${210 - i * 5}</text>`;
+      }
+      return s;
+    };
+    return { left: chart(false), right: chart(true) };
+  },
+
+  nxnw: () => {
+    const grid = () => {
+      let s = '';
+      for (let i = -4; i < 10; i++) s += `<line x1="${i * 34 + 90}" y1="0" x2="${i * 34}" y2="900" stroke="#eaf2ea" stroke-width="2" opacity="0.18"/>`;
+      for (let i = 0; i < 16; i++) s += `<line x1="0" y1="${40 + i * 58}" x2="200" y2="${20 + i * 58}" stroke="#eaf2ea" stroke-width="2" opacity="0.18"/>`;
+      return s;
+    };
+    return { left: grid(), right: grid() + '<polygon points="80,400 150,420 80,440" fill="#e0572a" opacity="0.8"/>' };
+  },
+
+  metropolis: () => {
+    const rays = (cx, cy) => {
+      let s = '';
+      for (let i = 0; i < 9; i++) {
+        const a = -Math.PI / 2 + (i - 4) * 0.18;
+        s += `<polygon points="${cx},${cy} ${(cx + Math.cos(a - 0.03) * 700).toFixed(0)},${(cy + Math.sin(a - 0.03) * 700).toFixed(0)} ${(cx + Math.cos(a + 0.03) * 700).toFixed(0)},${(cy + Math.sin(a + 0.03) * 700).toFixed(0)}" fill="#d4a64a" opacity="0.1"/>`;
+      }
+      return s;
+    };
+    const tower = (x, w, h) => `<polygon points="${x},900 ${x},${900 - h} ${x + w * 0.25},${900 - h} ${x + w * 0.25},${880 - h - 30} ${x + w * 0.75},${880 - h - 30} ${x + w * 0.75},${900 - h} ${x + w},${900 - h} ${x + w},900" fill="#0b0906" stroke="#d4a64a" stroke-width="2" opacity="0.6"/>`;
+    return {
+      left: rays(100, 900) + tower(20, 50, 300) + tower(90, 60, 420),
+      right: rays(100, 900) + tower(40, 56, 380) + tower(120, 50, 260),
+    };
+  },
 };
 
 /** Small deterministic random generator, so cut shapes look the same on every visit. */
