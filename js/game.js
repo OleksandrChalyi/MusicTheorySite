@@ -370,21 +370,23 @@ class Session {
       if (r.ok) e.right++;
       byKey.set(r.key, e);
     });
+    // Only notes you got right at least once (mistakes are listed separately); closest to "learned" first.
     const rows = [...byKey.values()]
+      .filter(e => e.right > 0)
       .map(e => ({ ...e, lvl: Math.min(MASTERED, this.mastery[e.key] || 0), ...this.levels.keyLabel(e.key) }))
-      .sort((a, b) => a.lvl - b.lvl || a.right / a.total - b.right / b.total);
+      .sort((a, b) => b.lvl - a.lvl || b.right - a.right);
     const learned = rows.filter(r => r.lvl >= MASTERED).length;
     const items = rows.map(r => {
       const pips = [0, 1, 2].map(i => `<i class="${i < r.lvl ? 'on' : ''}"></i>`).join('');
       const left = MASTERED - r.lvl;
       const status = r.lvl >= MASTERED ? '<em class="ok">выучена</em>' : `<em>ещё ${left} ${left === 1 ? 'быстрый ответ' : 'быстрых ответа'}</em>`;
-      return `<li><span class="nm"><b>${r.name}</b><small>${r.sub}</small></span><span class="hit">${r.right}/${r.total}</span><span class="pips">${pips}</span>${status}</li>`;
+      return `<li><span class="nm"><b>${r.name}</b><small>${r.sub}</small></span><span class="hit">×${r.right}</span><span class="pips">${pips}</span>${status}</li>`;
     }).join('');
     return `
       <div class="session-notes">
-        <h3>Ноты сеанса <span>${learned} из ${rows.length} выучены</span></h3>
-        <ul>${items}</ul>
-        <p class="sn-hint">«2/3» — угадал 2 раза из 3. Деления — прогресс ноты: 3 быстрых верных ответа подряд, и она выучена.</p>
+        <h3>Угаданные ноты <span>${learned} из ${rows.length} выучены</span></h3>
+        ${rows.length ? `<ul>${items}</ul>` : '<p class="sn-hint">В этом сеансе пока ни одной угаданной ноты.</p>'}
+        <p class="sn-hint">«×2» — угадал 2 раза за сеанс. Деления — прогресс ноты: 3 быстрых верных ответа подряд, и она выучена.</p>
       </div>`;
   }
 
