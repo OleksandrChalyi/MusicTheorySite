@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Игры · Гриф и ноты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,600&family=Manrope:wght@400;600;700;800&display=swap">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-root="../" data-section="games">
+  <main class="page narrow">
+    <h1>Игры</h1>
+    <p class="lead">Короткие тренажёры. Выбери один и играй, пока серия не станет больше 10.</p>
+    <div class="list" id="gameList"></div>
+  </main>
+
+  <script src="../js/core.js"></script>
+  <script src="../js/layout.js"></script>
+  <script>
+    $('#gameList').innerHTML = GAMES.map(g => `
+      <a class="list-item" href="${g.slug}.html">
+        <span class="list-num">${g.icon}</span>
+        <div><h3>${g.title}</h3><p>${g.desc}</p></div>
+        <span class="badge">${store.best[g.slug] ? 'рекорд ' + store.best[g.slug] : '→'}</span>
+      </a>`).join('');
+  </script>
+</body>
+</html>

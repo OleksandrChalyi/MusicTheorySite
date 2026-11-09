@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Угадай ноту · Гриф и ноты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,600&family=Manrope:wght@400;600;700;800&display=swap">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-root="../" data-section="games">
+  <main class="page">
+    <div class="crumbs"><a href="index.html">Игры</a></div>
+    <div class="game-head">
+      <h1>Угадай ноту</h1>
+      <div class="stats" id="stats"></div>
+    </div>
+
+    <details class="settings">
+      <summary>⚙ Настройки</summary>
+      <div class="settings-body">
+        <label class="setting">Лады
+          <div class="seg" data-key="maxFret" data-num><button data-val="4">0–4</button><button data-val="7">0–7</button><button data-val="12">0–12</button></div>
+        </label>
+        <button class="toggle" data-key="natural">Только без диезов</button>
+        <button class="toggle" data-key="heat">Карта ошибок</button>
+      </div>
+    </details>
+
+    <section class="stage">
+      <div class="prompt">
+        <div><span class="question">Какая это нота?</span><span class="question-sub" id="where"></span></div>
+        <button class="ghost-btn" id="replay">▶ Звук</button>
+      </div>
+      <div class="scroll-x" id="board"></div>
+      <div class="answers" id="answers"></div>
+      <div class="feedback" id="feedback" aria-live="polite"></div>
+    </section>
+
+    <div class="game-foot">
+      <span>Ноты, в которых ошибаешься, выпадают чаще. Не помнишь правила — <a href="../theory/fretboard.html">урок «Ноты на грифе»</a>.</span>
+      <button id="reset">Сбросить статистику грифа</button>
+    </div>
+  </main>
+
+  <script src="../js/core.js"></script>
+  <script src="../js/layout.js"></script>
+  <script src="../js/fretboard.js"></script>
+  <script src="../js/game.js"></script>
+  <script>
+    const score = new Score('guess-note', $('#stats'));
+    const game = { pos: null, done: false, ok: false, picked: null };
+
+    function next() {
+      game.pos = nextFretPosition(game.pos);
+      Object.assign(game, { done: false, ok: false, picked: null });
+      render();
+      pluck(OPEN_STRINGS[game.pos.s] + game.pos.f);
+    }
+
+    function render() {
+      const g = game.pos;
+      $('#where').textContent = `${stringName(g.s)}, ${fretName(g.f)}`;
+      const mark = game.done
+        ? { s: g.s, f: g.f, text: pcName(g.pc), kind: game.ok ? 'ok' : 'bad' }
+        : { s: g.s, f: g.f, text: '?', kind: 'target' };
+      $('#board').innerHTML = drawFretboard({ marks: [mark], maxFret: settings.maxFret, heat: settings.heat });
+
+      const pcs = settings.natural ? NATURAL_PCS : [...Array(12).keys()];
+      const options = pcs.map(pc => ({ value: pc, label: pcName(pc), sharp: !NATURAL_PCS.includes(pc) }));
+      $('#answers').innerHTML = answerButtons(options, game.done ? { correct: g.pc, picked: game.picked } : null);
+
+      const fb = $('#feedback');
+      if (!game.done) fb.innerHTML = '<span class="hint">Выбери ноту ниже.</span>';
+      else if (game.ok) fb.innerHTML = verdictHtml(true, `${stringName(g.s)}, ${fretName(g.f)} — ${pcName(g.pc)}.`);
+      else fb.innerHTML = verdictHtml(false,
+        `Это <b>${pcName(g.pc)}</b>, а не ${pcName(game.picked)}.<br><span class="path">${countPath(g.s, g.f)}</span>`, true);
+    }
+
+    function answer(pc) {
+      if (game.done) return;
+      const g = game.pos;
+      Object.assign(game, { done: true, picked: pc, ok: pc === g.pc });
+      recordResult(store.fret, g.s + '-' + g.f, game.ok);
+      score.record(game.ok);
+      pluck(OPEN_STRINGS[g.s] + g.f);
+      render();
+      if (game.ok) { const token = g; setTimeout(() => { if (game.pos === token) next(); }, 800); }
+    }
+
+    $('.stage').addEventListener('click', e => {
+      const btn = e.target.closest('[data-answer]');
+      if (btn) answer(Number(btn.dataset.answer));
+      if (e.target.closest('[data-next]')) next();
+    });
+    $('#replay').addEventListener('click', () => pluck(OPEN_STRINGS[game.pos.s] + game.pos.f));
+    document.addEventListener('keydown', e => { if (e.key === 'Enter' && game.done && !game.ok && !e.target.closest('button')) next(); });
+    document.addEventListener('settingschange', e => (['maxFret', 'natural'].includes(e.detail.key) ? next() : render()));
+    bindControls($('.settings'));
+    bindReset($('#reset'), () => { store.fret = {}; render(); });
+    next();
+  </script>
+</body>
+</html>

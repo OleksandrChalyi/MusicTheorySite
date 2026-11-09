@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Длительности и ритм · Гриф и ноты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,600&family=Manrope:wght@400;600;700;800&display=swap">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-root="../" data-section="theory" data-lesson="rhythm">
+  <main class="page narrow lesson">
+    <div class="crumbs"></div>
+    <h1>Длительности и ритм</h1>
+    <p class="lead">Высоту ноты показывает её место на стане, а длину — её вид.</p>
+
+    <h2>Доля</h2>
+    <p>Музыка идёт под равномерный пульс — как будто ты притопываешь ногой. Один такой удар называется <b>доля</b>.
+      Длительность ноты меряют в долях.</p>
+
+    <h2>Основные длительности</h2>
+    <p>Каждая следующая длительность в два раза короче предыдущей:</p>
+    <div class="table-wrap"><table>
+      <tr><th>Нота</th><th>Как выглядит</th><th>Долей</th></tr>
+      <tr><td>Целая</td><td>пустой овал без штиля</td><td>4</td></tr>
+      <tr><td>Половинная</td><td>пустой овал со штилем</td><td>2</td></tr>
+      <tr><td>Четверть</td><td>закрашенная со штилем</td><td>1</td></tr>
+      <tr><td>Восьмая</td><td>с флажком (или соединена ребром)</td><td>½</td></tr>
+      <tr><td>Шестнадцатая</td><td>с двумя флажками</td><td>¼</td></tr>
+    </table></div>
+    <figure class="example" data-time="4/4" data-notes="c/5:w | c/5:h c/5:h | c/5:q c/5:q c/5:q c/5:q | c/5:8 c/5:8 c/5:8 c/5:8 c/5:8 c/5:8 c/5:8 c/5:8">
+      <div class="staff"></div>
+      <figcaption>Каждый такт длится одинаково — 4 доли, но нот в нём всё больше.</figcaption>
+    </figure>
+    <p>Восьмые и шестнадцатые, которые стоят рядом, соединяют общей чертой — <b>ребром</b>. Так проще читать: видно, где начинается доля.</p>
+
+    <h2>Такт и размер</h2>
+    <p>Доли группируются в <b>такты</b>, их разделяют вертикальной <b>тактовой чертой</b>. В начале стоит <b>размер</b> — две цифры:</p>
+    <ul>
+      <li><b>верхняя</b> — сколько долей в такте;</li>
+      <li><b>нижняя</b> — какая длительность считается за долю (4 = четверть).</li>
+    </ul>
+    <p>4/4 — самый частый размер, почти вся поп- и рок-музыка. 3/4 — вальс: «раз-два-три, раз-два-три».</p>
+    <figure class="example" data-time="3/4" data-notes="c/4:h e/4:q | g/4:q e/4:q g/4:q | c/5:hd">
+      <div class="staff"></div>
+      <figcaption>Вальс в 3/4: в каждом такте три четверти.</figcaption>
+    </figure>
+
+    <h2>Точка после ноты</h2>
+    <p><b>Точка</b> увеличивает ноту на половину её длины. Половинная с точкой = 2 + 1 = <b>3 доли</b>. Четверть с точкой = 1 + ½ = <b>1½ доли</b>.</p>
+    <figure class="example" data-time="4/4" data-notes="e/4:qd e/4:8 g/4:h | a/4:hd g/4:q">
+      <div class="staff"></div>
+      <figcaption>Четверть с точкой + восьмая = две доли, но звучит «с оттяжкой».</figcaption>
+    </figure>
+
+    <h2>Паузы</h2>
+    <p><b>Пауза</b> — это тишина заданной длины. Для каждой длительности есть своя пауза.</p>
+    <figure class="example" data-time="4/4" data-notes="g/4:q r:q g/4:q r:q | g/4:h r:h | g/4:8 g/4:8 r:q g/4:8 g/4:8 r:q">
+      <div class="staff"></div>
+      <figcaption>Четвертные и половинные паузы между нотами.</figcaption>
+    </figure>
+
+    <div class="callout"><p><b>Попробуй:</b> нажми «Слушать» и отстукивай доли рукой. Каждый такт в 4/4 — ровно четыре удара.</p></div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.3/build/cjs/vexflow.js"></script>
+  <script src="../js/core.js"></script>
+  <script src="../js/layout.js"></script>
+  <script src="../js/staff.js"></script>
+  <script>initExamples();</script>
+</body>
+</html>

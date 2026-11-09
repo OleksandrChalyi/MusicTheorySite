@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ноты на грифе · Гриф и ноты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,600&family=Manrope:wght@400;600;700;800&display=swap">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-root="../" data-section="theory" data-lesson="fretboard">
+  <main class="page lesson">
+    <div class="crumbs"></div>
+    <h1>Ноты на грифе</h1>
+    <p class="lead">Как перенести всю теорию на гитару и находить любую ноту без подсчётов от нуля.</p>
+
+    <h2>Открытые струны</h2>
+    <p>Стандартный строй от толстой (6-й) к тонкой (1-й): <b>ми, ля, ре, соль, си, ми</b> — E A D G B E.
+      Запоминалка: <i>«Eddie Ate Dynamite, Good Bye Eddie»</i>.</p>
+    <div class="scroll-x" id="openBoard"></div>
+
+    <h2>Пять правил, которые экономят время</h2>
+    <ul>
+      <li><b>Один лад = полутон.</b> Между ми–фа и си–до нет диеза, это сразу соседние лады.</li>
+      <li><b>12-й лад = открытая струна</b>, только на октаву выше. Дальше всё повторяется.</li>
+      <li><b>5-й лад = следующая открытая струна</b> (более тонкая). Исключение — 3-я струна: там это <b>4-й лад</b>.</li>
+      <li><b>Октава:</b> через одну струну к тонким и +2 лада. Если перескакиваешь 2-ю струну — +3 лада.</li>
+      <li><b>Учи опорные точки</b> на 6-й и 5-й струнах — от них строятся почти все аккорды и гаммы.</li>
+    </ul>
+
+    <h2>Опорные ноты</h2>
+    <p>Натуральные ноты (без диезов) на 6-й и 5-й струнах. Выучи их — и любой «баррэ»-аккорд найдётся за секунду.</p>
+    <div class="scroll-x" id="anchorBoard"></div>
+
+    <h2>Гаммы и аккорды на грифе</h2>
+    <p>Выбери тонику и что построить — увидишь все ноты на первых 12 ладах. Нажми на лад, чтобы услышать звук.</p>
+    <div class="tool">
+      <div class="tool-row"><span class="tool-label">тоника</span><div class="tool-row" id="roots"></div></div>
+      <div class="tool-row" id="shapes"></div>
+      <div class="tool-row">
+        <span class="tool-label">подписи</span>
+        <div class="seg" data-key="label"><button data-val="name">Ноты</button><button data-val="deg">Ступени</button></div>
+        <button class="ghost-btn" id="shapePlay" style="margin-left:auto">▶ Слушать</button>
+      </div>
+      <div class="scroll-x" id="shapeBoard"></div>
+      <div class="chips" id="shapeNotes"></div>
+    </div>
+    <div class="callout"><p><b>Закрепить:</b> игры <a href="../games/guess-note.html">«Угадай ноту»</a> и <a href="../games/find-note.html">«Найди на грифе»</a>.</p></div>
+  </main>
+
+  <script src="../js/core.js"></script>
+  <script src="../js/layout.js"></script>
+  <script src="../js/fretboard.js"></script>
+  <script src="../js/tools.js"></script>
+  <script>
+    const SHAPES = [...SCALES, ...CHORDS.map(c => ({ ...c, name: 'Аккорд: ' + c.name.toLowerCase() }))];
+    const state = { root: 9, shape: 4 }; // A minor pentatonic — the classic first guitar scale
+
+    function renderStatic() {
+      $('#openBoard').innerHTML = drawFretboard({
+        clickable: true,
+        marks: OPEN_STRINGS.map((m, s) => ({ s, f: 0, text: pcName(m), kind: 'root' })),
+      });
+      const anchors = [];
+      [5, 4].forEach(s => {
+        for (let f = 0; f <= 12; f++) {
+          const pc = (OPEN_STRINGS[s] + f) % 12;
+          if (NATURAL_PCS.includes(pc)) anchors.push({ s, f, text: pcName(pc), kind: f === 0 || f === 12 ? 'root' : 'note' });
+        }
+      });
+      $('#anchorBoard').innerHTML = drawFretboard({ clickable: true, marks: anchors });
+    }
+
+    function render() {
+      const sh = SHAPES[state.shape];
+      renderPills($('#roots'), rootOptions(sh.minor), state.root, v => { state.root = Number(v); render(); });
+      renderPills($('#shapes'), SHAPES.map((s, i) => ({ value: i, label: s.name })), state.shape, v => { state.shape = Number(v); render(); });
+
+      const notes = buildNotes(state.root, sh.steps, { minor: sh.minor });
+      // semitone offset from the root -> {name, degree}
+      const bySemis = {};
+      sh.steps.forEach((st, i) => { bySemis[st[0] % 12] = { name: noteName(notes[i]), deg: degreeLabel(st) }; });
+
+      const marks = [];
+      for (let s = 0; s < 6; s++) {
+        for (let f = 0; f <= 12; f++) {
+          const semis = mod(OPEN_STRINGS[s] + f - state.root, 12);
+          const info = bySemis[semis];
+          if (info) marks.push({ s, f, text: settings.label === 'deg' ? info.deg : info.name, kind: semis === 0 ? 'root' : 'note' });
+        }
+      }
+      $('#shapeBoard').innerHTML = drawFretboard({ marks, clickable: true });
+      const uniq = sh.steps.filter(st => st[1] !== 8);
+      $('#shapeNotes').innerHTML = uniq.map((st, i) =>
+        `<div class="chip${i === 0 ? ' root' : ''}"><b>${noteName(notes[i])}</b><small>${degreeLabel(st)}</small></div>`).join('');
+    }
+
+    $('#shapePlay').addEventListener('click', () => {
+      const sh = SHAPES[state.shape];
+      const midis = buildNotes(state.root, sh.steps, { minor: sh.minor, octave: 3 }).map(n => n.midi);
+      if (sh.symbol !== undefined) { playMelody(midis, 0.3); playChord(midis, midis.length * 0.3 + 0.2); }
+      else playMelody(midis, 0.3);
+    });
+
+    $$('.scroll-x').forEach(enableFretSounds);
+    bindControls($('.tool'));
+    document.addEventListener('settingschange', () => { renderStatic(); render(); });
+    renderStatic();
+    render();
+  </script>
+</body>
+</html>

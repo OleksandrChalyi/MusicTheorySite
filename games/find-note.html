@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Найди на грифе · Гриф и ноты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,600&family=Manrope:wght@400;600;700;800&display=swap">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-root="../" data-section="games">
+  <main class="page">
+    <div class="crumbs"><a href="index.html">Игры</a></div>
+    <div class="game-head">
+      <h1>Найди на грифе</h1>
+      <div class="stats" id="stats"></div>
+    </div>
+
+    <details class="settings">
+      <summary>⚙ Настройки</summary>
+      <div class="settings-body">
+        <label class="setting">Лады
+          <div class="seg" data-key="maxFret" data-num><button data-val="4">0–4</button><button data-val="7">0–7</button><button data-val="12">0–12</button></div>
+        </label>
+        <button class="toggle" data-key="natural">Только без диезов</button>
+        <button class="toggle" data-key="heat">Карта ошибок</button>
+      </div>
+    </details>
+
+    <section class="stage">
+      <div class="prompt">
+        <div><span class="question" id="question"></span><span class="question-sub" id="where"></span></div>
+      </div>
+      <div class="scroll-x" id="board"></div>
+      <div class="feedback" id="feedback" aria-live="polite"></div>
+    </section>
+
+    <div class="game-foot">
+      <span>Статистика общая с игрой «Угадай ноту»: карта ошибок показывает слабые места.</span>
+      <button id="reset">Сбросить статистику грифа</button>
+    </div>
+  </main>
+
+  <script src="../js/core.js"></script>
+  <script src="../js/layout.js"></script>
+  <script src="../js/fretboard.js"></script>
+  <script src="../js/game.js"></script>
+  <script>
+    const score = new Score('find-note', $('#stats'));
+    const game = { pos: null, done: false, ok: false, clicked: null, warn: '' };
+
+    function next() {
+      game.pos = nextFretPosition(game.pos);
+      Object.assign(game, { done: false, ok: false, clicked: null, warn: '' });
+      render();
+    }
+
+    function render() {
+      const g = game.pos;
+      $('#question').innerHTML = `Найди <mark>${pcName(g.pc)}</mark>`;
+      $('#where').textContent = `на ${g.s + 1}-й струне` + (settings.maxFret < 12 ? `, лады 0–${settings.maxFret}` : '');
+
+      const marks = [];
+      if (game.done) {
+        for (let f = 0; f <= settings.maxFret; f++) {
+          if ((OPEN_STRINGS[g.s] + f) % 12 === g.pc) marks.push({ s: g.s, f, text: pcName(g.pc), kind: 'ok' });
+        }
+        if (!game.ok) marks.push({ ...game.clicked, text: pcName(game.clicked.pc), kind: 'bad' });
+      }
+      $('#board').innerHTML = drawFretboard({ marks, maxFret: settings.maxFret, activeString: g.s, heat: settings.heat, clickable: !game.done });
+
+      const fb = $('#feedback');
+      if (!game.done) fb.innerHTML = `<span class="hint">${game.warn || 'Нажми лад на подсвеченной струне.'}</span>`;
+      else if (game.ok) fb.innerHTML = verdictHtml(true, `${pcName(g.pc)} на ${g.s + 1}-й струне — все места отмечены.`);
+      else fb.innerHTML = verdictHtml(false,
+        `Там ${pcName(game.clicked.pc)}. Нужная нота отмечена зелёным.<br><span class="path">${countPath(g.s, g.f)}</span>`, true);
+    }
+
+    function clickFret(s, f) {
+      if (game.done) return;
+      const g = game.pos;
+      pluck(OPEN_STRINGS[s] + f);
+      if (s !== g.s) {
+        game.warn = `Это ${stringName(s)}. Нужна ${g.s + 1}-я — она подсвечена.`;
+        render();
+        return;
+      }
+      const pc = (OPEN_STRINGS[s] + f) % 12;
+      Object.assign(game, { done: true, ok: pc === g.pc, clicked: { s, f, pc } });
+      recordResult(store.fret, g.s + '-' + g.f, game.ok);
+      score.record(game.ok);
+      render();
+      if (game.ok) { const token = g; setTimeout(() => { if (game.pos === token) next(); }, 900); }
+    }
+
+    $('.stage').addEventListener('click', e => {
+      const cell = e.target.closest('.cell');
+      if (cell) clickFret(Number(cell.dataset.s), Number(cell.dataset.f));
+      if (e.target.closest('[data-next]')) next();
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Enter' && game.done && !game.ok && !e.target.closest('button')) next(); });
+    document.addEventListener('settingschange', e => (['maxFret', 'natural'].includes(e.detail.key) ? next() : render()));
+    bindControls($('.settings'));
+    bindReset($('#reset'), () => { store.fret = {}; render(); });
+    next();
+  </script>
+</body>
+</html>

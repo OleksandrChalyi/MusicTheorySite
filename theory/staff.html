@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Нотный стан и ключи · Гриф и ноты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,600&family=Manrope:wght@400;600;700;800&display=swap">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-root="../" data-section="theory" data-lesson="staff">
+  <main class="page narrow lesson">
+    <div class="crumbs"></div>
+    <h1>Нотный стан и ключи</h1>
+    <p class="lead">Где пишутся ноты и как понять, какая нота перед тобой.</p>
+
+    <h2>Пять линеек</h2>
+    <p><b>Нотный стан</b> — это пять горизонтальных линий. Считают их <b>снизу вверх</b>: самая нижняя — первая.
+      Ноты пишут <b>на линейках</b> и <b>между ними</b> (в промежутках). Чем выше нота на стане, тем выше звук.</p>
+    <figure class="example" data-clef="none" data-notes="e/4 f/4 g/4 a/4 b/4 c/5 d/5 e/5 f/5" data-silent>
+      <div class="staff"></div>
+      <figcaption>Ноты идут по очереди: линейка, промежуток, линейка, промежуток…</figcaption>
+    </figure>
+
+    <h2>Добавочные линейки</h2>
+    <p>Если нота не помещается на стан, для неё рисуют короткую <b>добавочную линейку</b> сверху или снизу.
+      Считаются они так же: линейка, промежуток, линейка…</p>
+    <figure class="example" data-notes="a/3 b/3 c/4 d/4 | g/5 a/5 b/5 c/6" data-labels>
+      <div class="staff"></div>
+      <figcaption>Слева — ниже стана, справа — выше.</figcaption>
+    </figure>
+
+    <h2>Скрипичный ключ</h2>
+    <p>Сами линейки ничего не значат, пока в начале строки нет <b>ключа</b>. Ключ говорит, какая нота на какой линейке.</p>
+    <p><b>Скрипичный ключ</b> (ключ «соль») закручивается вокруг <b>второй линейки</b> — на ней стоит соль (G).
+      Отсюда считаются все остальные ноты.</p>
+    <figure class="example" data-notes="e/4 g/4 b/4 d/5 f/5" data-labels>
+      <div class="staff"></div>
+      <figcaption>Ноты на линейках снизу вверх.</figcaption>
+    </figure>
+    <figure class="example" data-notes="f/4 a/4 c/5 e/5" data-labels>
+      <div class="staff"></div>
+      <figcaption>Ноты в промежутках. По-английски они складываются в слово FACE.</figcaption>
+    </figure>
+    <div class="callout"><p>Запомни три опоры: <b>ми</b> на первой линейке, <b>соль</b> на второй (там, где закручен ключ),
+      <b>до первой октавы</b> на первой добавочной снизу. Остальные ноты находишь от них шагами.</p></div>
+
+    <h2>Басовый ключ</h2>
+    <p><b>Басовый ключ</b> (ключ «фа») пишут для низких инструментов: бас-гитары, левой руки фортепиано.
+      Две точки обнимают <b>четвёртую линейку</b> — там фа (F) малой октавы.</p>
+    <figure class="example" data-clef="bass" data-notes="g/2 b/2 d/3 f/3 a/3" data-labels>
+      <div class="staff"></div>
+      <figcaption>Линейки басового ключа снизу вверх.</figcaption>
+    </figure>
+
+    <h2>Как записывают гитару</h2>
+    <p>Гитару пишут в скрипичном ключе <b>с маленькой восьмёркой снизу</b>. Восьмёрка значит: звучит на <b>октаву ниже</b>, чем написано.
+      Так низкие ноты гитары не уходят далеко вниз под стан.</p>
+    <figure class="example" data-clef="treble8" data-notes="e/3=6 a/3=5 d/4=4 g/4=3 b/4=2 e/5=1">
+      <div class="staff"></div>
+      <figcaption>Открытые струны гитары: цифра — номер струны.</figcaption>
+    </figure>
+    <p class="muted">Часто восьмёрку не рисуют, но гитара всё равно звучит на октаву ниже записи.</p>
+
+    <div class="callout"><p><b>Закрепить:</b> игра <a href="../games/read-staff.html">«Читай ноты»</a> — ноты на стане по одной, пока не начнёшь узнавать их сразу.</p></div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.3/build/cjs/vexflow.js"></script>
+  <script src="../js/core.js"></script>
+  <script src="../js/layout.js"></script>
+  <script src="../js/staff.js"></script>
+  <script>initExamples();</script>
+</body>
+</html>

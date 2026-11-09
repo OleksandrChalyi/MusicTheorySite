@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Читай ноты · Гриф и ноты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,600&family=Manrope:wght@400;600;700;800&display=swap">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-root="../" data-section="games">
+  <main class="page">
+    <div class="crumbs"><a href="index.html">Игры</a></div>
+    <div class="game-head">
+      <h1>Читай ноты</h1>
+      <div class="stats" id="stats"></div>
+    </div>
+
+    <details class="settings">
+      <summary>⚙ Настройки</summary>
+      <div class="settings-body">
+        <label class="setting">Диапазон
+          <div class="seg" data-key="staffRange"><button data-val="staff">На линейках</button><button data-val="full">Весь гриф (доп. линейки)</button></div>
+        </label>
+      </div>
+    </details>
+
+    <section class="stage">
+      <div class="prompt">
+        <div><span class="question">Что за нота?</span><span class="question-sub">Гитарный ключ: звучит на октаву ниже записи</span></div>
+        <button class="ghost-btn" id="hint">Подсказка</button>
+      </div>
+      <div class="staff-stage"><div class="staff" id="staff"></div></div>
+      <div class="answers" id="answers"></div>
+      <div class="feedback" id="feedback" aria-live="polite"></div>
+      <div id="boardWrap" hidden>
+        <div class="sublabel">Где эта нота на гитаре</div>
+        <div class="scroll-x" id="board"></div>
+      </div>
+    </section>
+
+    <div class="game-foot">
+      <span>Забыл, как читать стан? <a href="../theory/staff.html">Урок «Нотный стан и ключи»</a>.</span>
+      <button id="reset">Сбросить статистику нот</button>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.3/build/cjs/vexflow.js"></script>
+  <script src="../js/core.js"></script>
+  <script src="../js/layout.js"></script>
+  <script src="../js/fretboard.js"></script>
+  <script src="../js/staff.js"></script>
+  <script src="../js/game.js"></script>
+  <script>
+    // A note is stored as a diatonic position p: letter = p % 7, octave = floor(p / 7).
+    // Written range: "staff" D4..G5 (on the five lines), "full" E3..B5 (whole neck up to the 12th fret).
+    const RANGES = { staff: [29, 39], full: [23, 41] };
+    const score = new Score('read-staff', $('#stats'));
+    const game = { p: null, done: false, ok: false, picked: null, hint: false };
+
+    const writtenNote = p => makeNote(p % 7, 0, Math.floor(p / 7));
+    const soundingMidi = p => writtenNote(p).midi - 12;
+
+    function next() {
+      const [lo, hi] = RANGES[settings.staffRange];
+      let cands = [];
+      for (let p = lo; p <= hi; p++) cands.push(p);
+      if (game.p !== null && cands.length > 1) cands = cands.filter(p => p !== game.p);
+      game.p = weightedPick(cands, p => itemWeight(store.staff[p]));
+      Object.assign(game, { done: false, ok: false, picked: null, hint: false });
+      render();
+    }
+
+    function render() {
+      const note = writtenNote(game.p);
+      const color = game.done ? (game.ok ? STAFF_COLORS.ok : STAFF_COLORS.bad) : undefined;
+      drawStaff($('#staff'), {
+        clef: 'treble8',
+        height: 150,
+        top: 10,
+        scale: 1.5,
+        items: [{ notes: [note], color, label: game.done ? noteName(note) : undefined }],
+      });
+
+      const options = LETTERS_EN.map((_, li) => ({ value: li, label: letterName(li) }));
+      $('#answers').innerHTML = answerButtons(options, game.done ? { correct: note.letter, picked: game.picked } : null);
+
+      const spots = guitarSpots(soundingMidi(game.p));
+      const fb = $('#feedback');
+      if (!game.done) {
+        fb.innerHTML = game.hint
+          ? `<span class="hint">Линейки снизу вверх: ${[2, 4, 6, 1, 3].map(letterName).join(', ')}. Промежутки: ${[3, 5, 0, 2].map(letterName).join(', ')}.</span>`
+          : '<span class="hint">Выбери название ноты.</span>';
+      } else {
+        const where = spots.map(x => `${x.s + 1}-я струна, ${x.f === 0 ? 'открытая' : x.f + ' лад'}`).join(' · ');
+        fb.innerHTML = verdictHtml(game.ok, `Это <b>${noteName(note)}</b> <span class="hint">(${LETTERS_EN[note.letter]}${note.octave} по записи)</span>. На гитаре: ${where}.`, !game.ok);
+      }
+
+      $('#boardWrap').hidden = !game.done;
+      if (game.done) {
+        $('#board').innerHTML = drawFretboard({ clickable: true, marks: spots.map(x => ({ ...x, text: noteName(note), kind: 'ok' })) });
+      }
+    }
+
+    function answer(li) {
+      if (game.done) return;
+      const note = writtenNote(game.p);
+      Object.assign(game, { done: true, picked: li, ok: li === note.letter });
+      recordResult(store.staff, game.p, game.ok);
+      score.record(game.ok);
+      pluck(soundingMidi(game.p));
+      render();
+      if (game.ok) { const token = game.p; setTimeout(() => { if (game.p === token && game.done) next(); }, 1100); }
+    }
+
+    $('.stage').addEventListener('click', e => {
+      const btn = e.target.closest('[data-answer]');
+      if (btn) answer(Number(btn.dataset.answer));
+      if (e.target.closest('[data-next]')) next();
+    });
+    enableFretSounds($('#board'));
+    $('#hint').addEventListener('click', () => { game.hint = true; render(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Enter' && game.done && !game.ok && !e.target.closest('button')) next(); });
+    document.addEventListener('settingschange', e => (e.detail.key === 'staffRange' ? next() : render()));
+    bindControls($('.settings'));
+    bindReset($('#reset'), () => { store.staff = {}; });
+    next();
+  </script>
+</body>
+</html>

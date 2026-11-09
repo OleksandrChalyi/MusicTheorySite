@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Гаммы · Гриф и ноты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,600&family=Manrope:wght@400;600;700;800&display=swap">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-root="../" data-section="theory" data-lesson="scales">
+  <main class="page narrow lesson">
+    <div class="crumbs"></div>
+    <h1>Гаммы</h1>
+    <p class="lead">Гамма — набор нот, из которых сделана мелодия. Её задаёт формула шагов от главной ноты.</p>
+
+    <h2>Тоника и формула</h2>
+    <p>Главная нота гаммы называется <b>тоника</b>. От неё гамма поднимается шагами по <b>тону (Т)</b> и <b>полутону (П)</b>.
+      У каждого вида гаммы своя формула — она одинакова от любой ноты.</p>
+
+    <h2>Мажор</h2>
+    <p>Формула мажора: <span class="formula">Т Т П Т Т Т П</span>. Звучит светло и устойчиво.</p>
+    <figure class="example" data-notes="c/4 d/4 e/4 f/4 g/4 a/4 b/4 c/5" data-labels>
+      <div class="staff"></div>
+      <figcaption>До мажор — единственный мажор без диезов и бемолей.</figcaption>
+    </figure>
+    <p>Если начать от соль и шагать по той же формуле, на 7-й ступени понадобится фа♯ — иначе там был бы полутон вместо тона:</p>
+    <figure class="example" data-notes="g/4 a/4 b/4 c/5 d/5 e/5 f#/5 g/5" data-labels>
+      <div class="staff"></div>
+      <figcaption>Соль мажор: одна нота с диезом.</figcaption>
+    </figure>
+    <div class="callout"><p>В гамме каждая буква встречается <b>ровно один раз</b>. Поэтому в фа мажоре пишут си♭, а не ля♯: ля уже есть.</p></div>
+
+    <h2>Минор</h2>
+    <p>Формула натурального минора: <span class="formula">Т П Т Т П Т Т</span>. Звучит грустнее: третья ступень на полутон ниже, чем в мажоре.</p>
+    <figure class="example" data-notes="a/4 b/4 c/5 d/5 e/5 f/5 g/5 a/5" data-labels>
+      <div class="staff"></div>
+      <figcaption>Ля минор — те же ноты, что в до мажоре, но тоника другая.</figcaption>
+    </figure>
+    <p>У каждого мажора есть <b>параллельный минор</b> с теми же нотами. Его тоника — на 6-й ступени мажора (или на малую терцию ниже).
+      До мажор ↔ ля минор, соль мажор ↔ ми минор.</p>
+
+    <h2>Пентатоника</h2>
+    <p><b>Пентатоника</b> — гамма из пяти нот: из мажора или минора убирают две ступени, которые дают полутоны.
+      Остаётся звучание, в котором почти невозможно «промахнуться». Поэтому на ней построено большинство гитарных соло в роке и блюзе.</p>
+
+    <h2>Собери любую гамму</h2>
+    <div class="tool">
+      <div class="tool-row"><span class="tool-label">тоника</span><div class="tool-row" id="roots"></div></div>
+      <div class="tool-row" id="types"></div>
+      <figure class="example"><div class="staff" id="scaleStaff"></div>
+        <figcaption><span>Шаги: <span class="formula" id="pattern"></span></span><button class="play-btn" id="scalePlay">▶ Слушать</button></figcaption>
+      </figure>
+      <div class="chips" id="degrees"></div>
+    </div>
+    <p class="muted">Ступени с ♭ — пониженные относительно мажора. По ним видно, чем гамма отличается от мажорной.</p>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.3/build/cjs/vexflow.js"></script>
+  <script src="../js/core.js"></script>
+  <script src="../js/layout.js"></script>
+  <script src="../js/staff.js"></script>
+  <script src="../js/tools.js"></script>
+  <script>
+    initExamples();
+
+    const state = { root: 0, type: 0 };
+    const scaleNotes = () => {
+      const sc = SCALES[state.type];
+      return buildNotes(state.root, sc.steps, { minor: sc.minor });
+    };
+
+    function render() {
+      const sc = SCALES[state.type];
+      renderPills($('#roots'), rootOptions(sc.minor), state.root, v => { state.root = Number(v); render(); play(); });
+      renderPills($('#types'), SCALES.map((s, i) => ({ value: i, label: s.name })), state.type, v => { state.type = Number(v); render(); play(); });
+
+      const notes = scaleNotes();
+      drawStaff($('#scaleStaff'), {
+        clef: 'treble',
+        items: notes.map((n, i) => ({ notes: [n], label: noteName(n), color: i === 0 || i === notes.length - 1 ? STAFF_COLORS.accent : undefined })),
+      });
+      $('#pattern').textContent = stepPattern(sc.steps);
+      $('#degrees').innerHTML = sc.steps.slice(0, -1).map((st, i) =>
+        `<div class="chip${i === 0 ? ' root' : ''}"><b>${noteName(notes[i])}</b><small>ступень ${degreeLabel(st)}</small></div>`).join('');
+    }
+
+    const play = () => playMelody(scaleNotes().map(n => n.midi), 0.32);
+
+    $('#scalePlay').addEventListener('click', play);
+    document.addEventListener('settingschange', render);
+    render();
+  </script>
+</body>
+</html>

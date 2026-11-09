@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Интервалы · Гриф и ноты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,600&family=Manrope:wght@400;600;700;800&display=swap">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-root="../" data-section="theory" data-lesson="intervals">
+  <main class="page narrow lesson">
+    <div class="crumbs"></div>
+    <h1>Интервалы</h1>
+    <p class="lead">Интервал — это расстояние между двумя нотами. Из интервалов строится всё: гаммы, аккорды, мелодии.</p>
+
+    <h2>Два способа считать</h2>
+    <p><b>1. По ступеням (буквам)</b> — даёт «номер» интервала. Считаем обе крайние ноты: от до до ми — до, ре, ми — три ступени, это <b>терция</b>.</p>
+    <p>Номера: 1 — прима, 2 — секунда, 3 — терция, 4 — кварта, 5 — квинта, 6 — секста, 7 — септима, 8 — октава.</p>
+    <p><b>2. По полутонам (ладам)</b> — уточняет вид: <b>малая</b> или <b>большая</b> терция, <b>чистая</b> квинта и т.д.
+      До–ми♭ и до–ми — обе терции, но в первой 3 полутона (малая), во второй 4 (большая).</p>
+    <figure class="example" data-notes="c/4+eb/4=малая_терция c/4+e/4=большая_терция" >
+      <div class="staff"></div>
+      <figcaption>Малая терция звучит грустно, большая — светло. Это основа минора и мажора.</figcaption>
+    </figure>
+
+    <h2>Все интервалы в октаве</h2>
+    <p>Выбери ноту, от которой строить, и нажми на строку таблицы — интервал появится на стане и прозвучит.</p>
+    <div class="tool">
+      <div class="tool-row"><span class="tool-label">от ноты</span><div class="tool-row" id="roots"></div></div>
+      <figure class="example"><div class="staff" id="intStaff"></div>
+        <figcaption><span id="intCaption"></span><button class="play-btn" id="intPlay">▶ Слушать</button></figcaption>
+      </figure>
+      <div class="table-wrap" style="margin:0"><table id="intTable"></table></div>
+    </div>
+
+    <h2>Как слышать интервалы</h2>
+    <ul>
+      <li><b>Консонансы</b> (звучат спокойно): октава, чистая квинта, чистая кварта, терции, сексты.</li>
+      <li><b>Диссонансы</b> (звучат напряжённо, хотят «разрешиться»): секунды, септимы, тритон.</li>
+      <li>Квинта — это «пауэр-корд» в роке: тоника + квинта, без терции.</li>
+    </ul>
+    <div class="callout"><p><b>На гитаре:</b> число полутонов = число ладов на одной струне. Большая терция — 4 лада вверх, чистая квинта — 7 ладов
+      (или на соседней толстой струне: та же струна ниже на 2 лада).</p></div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.3/build/cjs/vexflow.js"></script>
+  <script src="../js/core.js"></script>
+  <script src="../js/layout.js"></script>
+  <script src="../js/staff.js"></script>
+  <script src="../js/tools.js"></script>
+  <script>
+    initExamples();
+
+    // [semitones, degree, short name, character]
+    const INTERVALS = [
+      [0, 1, 'ч1', 'тот же звук'],
+      [1, 2, 'м2', 'резко, напряжённо'],
+      [2, 2, 'б2', 'шаг гаммы'],
+      [3, 3, 'м3', 'грустно (минор)'],
+      [4, 3, 'б3', 'светло (мажор)'],
+      [5, 4, 'ч4', 'открыто'],
+      [6, 4, 'ув4', 'тритон, очень напряжённо'],
+      [7, 5, 'ч5', 'устойчиво, «пауэр-корд»'],
+      [8, 6, 'м6', 'мягко, печально'],
+      [9, 6, 'б6', 'тепло'],
+      [10, 7, 'м7', 'блюзово, хочет разрешиться'],
+      [11, 7, 'б7', 'остро, мечтательно'],
+      [12, 8, 'ч8', 'та же нота выше'],
+    ];
+    const state = { root: 0, interval: 4 };
+
+    function intervalNotes() {
+      const [semis, degree] = INTERVALS[state.interval];
+      return buildNotes(state.root, [[0, 1], [semis, degree]]);
+    }
+
+    function render() {
+      renderPills($('#roots'), rootOptions(false), state.root, v => { state.root = Number(v); render(); play(); });
+
+      const [low, high] = intervalNotes();
+      drawStaff($('#intStaff'), {
+        clef: 'treble',
+        items: [
+          { notes: [low], label: noteName(low) },
+          { notes: [high], label: noteName(high), color: STAFF_COLORS.accent },
+          { bar: true },
+          { notes: [low, high], label: 'вместе' },
+        ],
+      });
+      const [semis] = INTERVALS[state.interval];
+      $('#intCaption').textContent = `${noteName(low)} → ${noteName(high)}: ${INTERVAL_NAMES[semis]}, ${semis} полутон${semis === 1 ? '' : semis > 1 && semis < 5 ? 'а' : 'ов'}`;
+
+      $('#intTable').innerHTML = '<tr><th>Полутонов</th><th>Интервал</th><th></th><th>Пример</th><th>Звучит</th></tr>' +
+        INTERVALS.map(([s, d, short, mood], i) => {
+          const [, top] = buildNotes(state.root, [[0, 1], [s, d]]);
+          return `<tr class="clickable" data-i="${i}" aria-selected="${i === state.interval}">
+            <td>${s}</td><td>${INTERVAL_NAMES[s]}</td><td class="muted">${short}</td>
+            <td>${rootName(state.root, false)} → ${noteName(top)}</td><td class="muted">${mood}</td></tr>`;
+        }).join('');
+    }
+
+    function play() {
+      const [low, high] = intervalNotes();
+      playMelody([low.midi, high.midi], 0.5);
+      playChord([low.midi, high.midi], 1.1);
+    }
+
+    $('#intTable').addEventListener('click', e => {
+      const row = e.target.closest('[data-i]');
+      if (!row) return;
+      state.interval = Number(row.dataset.i);
+      render();
+      play();
+    });
+    $('#intPlay').addEventListener('click', play);
+    document.addEventListener('settingschange', render);
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Названия нот · Гриф и ноты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,600&family=Manrope:wght@400;600;700;800&display=swap">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-root="../" data-section="theory" data-lesson="notes">
+  <main class="page narrow lesson">
+    <div class="crumbs"></div>
+    <h1>Названия нот</h1>
+    <p class="lead">Семь нот, которые повторяются по кругу, и ещё пять «между ними».</p>
+
+    <h2>Семь нот</h2>
+    <p>В музыке всего семь названий нот. У них два набора имён — оба нужно знать, на гитарных сайтах и в аккордах почти всегда буквы:</p>
+    <div class="table-wrap"><table>
+      <tr><th>По-русски</th><td>до</td><td>ре</td><td>ми</td><td>фа</td><td>соль</td><td>ля</td><td>си</td></tr>
+      <tr><th>Буквами</th><td>C</td><td>D</td><td>E</td><td>F</td><td>G</td><td>A</td><td>B</td></tr>
+    </table></div>
+    <p>После си снова идёт до, только выше. Расстояние от одной до до следующей называется <b>октава</b>.</p>
+    <figure class="example" data-notes="c/4 d/4 e/4 f/4 g/4 a/4 b/4 c/5" data-labels>
+      <div class="staff"></div>
+      <figcaption>Гамма до мажор: все семь нот и снова до.</figcaption>
+    </figure>
+    <div class="callout"><p>Переключатель <b>«До Ре Ми / C D E»</b> вверху меняет названия нот во всех примерах и играх.</p></div>
+
+    <h2>Тон и полутон</h2>
+    <p><b>Полутон</b> — самое маленькое расстояние между нотами. На гитаре это <b>один лад</b>, на пианино — соседняя клавиша (вместе с чёрными).
+      <b>Тон</b> = два полутона = два лада.</p>
+    <p>Между большинством соседних нот — тон. Но есть две пары, где только <b>полутон</b>: <b>ми–фа</b> (E–F) и <b>си–до</b> (B–C).
+      Это видно на клавиатуре: между ними нет чёрной клавиши.</p>
+    <div class="piano-box" data-half-steps></div>
+    <p class="muted">Нажми на клавишу, чтобы услышать звук.</p>
+
+    <h2>Диез, бемоль, бекар</h2>
+    <ul>
+      <li><b>Диез ♯</b> повышает ноту на полутон: до♯ = на лад выше до.</li>
+      <li><b>Бемоль ♭</b> понижает на полутон: ре♭ = на лад ниже ре.</li>
+      <li><b>Бекар ♮</b> отменяет диез или бемоль.</li>
+    </ul>
+    <figure class="example" data-notes="c/4 c#/4 d/4 | e/4 eb/4 d/4" data-labels>
+      <div class="staff"></div>
+      <figcaption>Вверх через диез, вниз через бемоль.</figcaption>
+    </figure>
+    <p>Заметь: до♯ и ре♭ — это <b>один и тот же звук</b> (одна клавиша, один лад). Такие ноты называются <b>энгармонически равными</b>.
+      Какое имя выбрать, зависит от гаммы — об этом в уроке про гаммы.</p>
+    <figure class="example" data-notes="c#/4 db/4 | f#/4 gb/4 | a#/4 bb/4" data-labels>
+      <div class="staff"></div>
+      <figcaption>Пары с одинаковым звуком.</figcaption>
+    </figure>
+
+    <h2>Все 12 звуков</h2>
+    <p>Семь «белых» нот плюс пять «чёрных» = <b>12 разных звуков</b> в октаве. Дальше всё повторяется. На гитаре это 12 ладов: на 12-м ладу звучит та же нота, что и на открытой струне, только на октаву выше.</p>
+    <figure class="example" data-notes="c/4 c#/4 d/4 d#/4 e/4 f/4 f#/4 g/4 g#/4 a/4 a#/4 b/4 c/5" data-silent>
+      <div class="staff"></div>
+      <figcaption>Хроматическая гамма — все 12 звуков подряд, по полутону.</figcaption>
+    </figure>
+
+    <h2>Номера октав</h2>
+    <p>Чтобы различать одинаковые ноты разной высоты, к букве добавляют номер: <b>C4</b> — до первой октавы (середина пианино), <b>C5</b> — на октаву выше.
+      Открытая 6-я струна гитары — это <b>E2</b>, 1-я — <b>E4</b>.</p>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.3/build/cjs/vexflow.js"></script>
+  <script src="../js/core.js"></script>
+  <script src="../js/layout.js"></script>
+  <script src="../js/staff.js"></script>
+  <script>initExamples(); initPianos();</script>
+</body>
+</html>
