@@ -6,7 +6,7 @@
   <title>Игры · Гриф и ноты</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,600&family=Manrope:wght@400;600;700;800&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Rubik:wght@400;500;700&family=Caveat:wght@600;700&display=swap">
   <link rel="stylesheet" href="../css/style.css">
 </head>
 <body data-root="../" data-section="games">
@@ -19,9 +19,9 @@
   <script src="../js/core.js"></script>
   <script src="../js/layout.js"></script>
   <script>
-    $('#gameList').innerHTML = GAMES.map(g => `
+    $('#gameList').innerHTML = GAMES.map((g, i) => `
       <a class="list-item" href="${g.slug}.html">
-        <span class="list-num">${g.icon}</span>
+        <span class="list-num">${String(i + 1).padStart(2, '0')}</span>
         <div><h3>${g.title}</h3><p>${g.desc}</p></div>
         <span class="badge">${store.best[g.slug] ? 'рекорд ' + store.best[g.slug] : '→'}</span>
       </a>`).join('');

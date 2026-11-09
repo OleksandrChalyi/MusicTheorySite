@@ -53,7 +53,7 @@ function answerButtons(options, state) {
       if (o.value === state.correct) cls += ' right';
       else if (o.value === state.picked) cls += ' wrong';
     }
-    return `<button class="${cls}" data-answer="${o.value}" ${state ? 'disabled' : ''}>${o.label}</button>`;
+    return `<button class="${cls}" data-answer="${o.value}" ${state ? 'disabled' : ''}><span>${o.label}</span></button>`;
   }).join('');
 }
 

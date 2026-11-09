@@ -19,6 +19,19 @@ const GAMES = [
   { slug: 'read-staff', title: 'Читай ноты', desc: 'Нота на нотном стане — назови её и найди на гитаре.', icon: '🎼' },
 ];
 
+/** SVG filters used by CSS (filter: url(#rough)) for painterly, brush-like edges. */
+function injectFilters() {
+  const defs = document.createElement('div');
+  defs.innerHTML = `
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+      <filter id="rough" x="-10%" y="-30%" width="120%" height="160%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.035 0.09" numOctaves="3" seed="7"/>
+        <feDisplacementMap in="SourceGraphic" scale="10"/>
+      </filter>
+    </svg>`;
+  document.body.prepend(defs.firstElementChild);
+}
+
 function renderHeader() {
   const root = document.body.dataset.root || '';
   const section = document.body.dataset.section || '';
@@ -65,5 +78,6 @@ function renderLessonPager() {
   if (crumbs) crumbs.innerHTML = `<a href="index.html">Теория</a> · Урок ${i + 1} из ${LESSONS.length}`;
 }
 
+injectFilters();
 renderHeader();
 renderLessonPager();

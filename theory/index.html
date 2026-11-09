@@ -6,7 +6,7 @@
   <title>Теория · Гриф и ноты</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,600&family=Manrope:wght@400;600;700;800&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Rubik:wght@400;500;700&family=Caveat:wght@600;700&display=swap">
   <link rel="stylesheet" href="../css/style.css">
 </head>
 <body data-root="../" data-section="theory">
@@ -21,7 +21,7 @@
   <script>
     $('#lessonList').innerHTML = LESSONS.map((l, i) => `
       <a class="list-item${store.visited[l.slug] ? ' done' : ''}" href="${l.slug}.html">
-        <span class="list-num">${store.visited[l.slug] ? '✓' : i + 1}</span>
+        <span class="list-num" title="${store.visited[l.slug] ? 'Пройден' : ''}">${String(i + 1).padStart(2, '0')}</span>
         <div><h3>${l.title}</h3><p>${l.desc}</p></div>
         <span class="arrow">→</span>
       </a>`).join('');

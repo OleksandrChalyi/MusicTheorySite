@@ -15,7 +15,7 @@
      c/4=Text     custom label under the note ("_" = no label)
    ========================================================== */
 
-const STAFF_COLORS = { accent: '#c9781a', ok: '#1f9d5a', bad: '#d6403a' };
+const STAFF_COLORS = { accent: '#d4105f', ok: '#0e9c88', bad: '#e0600c' };
 const VEX_ACC = { 1: '#', '-1': 'b', 2: '##', '-2': 'bb' };
 const BEATS = { w: 4, h: 2, q: 1, 8: 0.5, 16: 0.25 };
 
@@ -100,7 +100,7 @@ function makeStaveNote(VF, item, clef, autoLabels) {
   if (label === undefined && autoLabels && !item.rest) label = item.notes.map(noteName).join(' ');
   if (label && label !== '_') {
     const ann = new VF.Annotation(label.replace(/_/g, ' '));
-    ann.setFont('Manrope', 12, 'bold');
+    ann.setFont('Oswald', 13, 'bold');
     ann.setVerticalJustification(VF.Annotation.VerticalJustify.BOTTOM);
     note.addModifier(ann, 0);
   }
