@@ -43,7 +43,7 @@ function verdictHtml(ok, text, showNext) {
 }
 
 /**
- * Answer buttons. options: [{ value, label, sharp? }].
+ * Answer buttons. options: [{ value, label, alt?, sharp? }] — alt is the other note name.
  * After an answer pass state { correct, picked } to colour them.
  */
 function answerButtons(options, state) {
@@ -53,7 +53,8 @@ function answerButtons(options, state) {
       if (o.value === state.correct) cls += ' right';
       else if (o.value === state.picked) cls += ' wrong';
     }
-    return `<button class="${cls}" data-answer="${o.value}" ${state ? 'disabled' : ''}><span>${o.label}</span></button>`;
+    const altTag = o.alt && settings.dual ? `<span class="alt">${o.alt}</span>` : '';
+    return `<button class="${cls}" data-answer="${o.value}" ${state ? 'disabled' : ''}><span>${o.label}</span>${altTag}</button>`;
   }).join('');
 }
 

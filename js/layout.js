@@ -71,9 +71,10 @@ function renderHeader() {
         <a href="${root}games/index.html"${current('games')}>Игры</a>
       </nav>
       <div class="topbar-tools">
-        <div class="seg" data-key="notation" title="Как называть ноты">
+        <div class="seg" data-key="notation" title="Главные названия нот">
           <button data-val="ru">До Ре Ми</button><button data-val="en">C D E</button>
         </div>
+        <button class="toggle" data-key="dual" title="Показывать второе название мелко рядом">Оба</button>
         <button class="toggle" data-key="sound">♪ Звук</button>
       </div>
     </div>`;

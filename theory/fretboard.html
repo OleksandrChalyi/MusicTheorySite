@@ -94,7 +94,7 @@
       $('#shapeBoard').innerHTML = drawFretboard({ marks, clickable: true });
       const uniq = sh.steps.filter(st => st[1] !== 8);
       $('#shapeNotes').innerHTML = uniq.map((st, i) =>
-        `<div class="chip${i === 0 ? ' root' : ''}"><b>${noteName(notes[i])}</b><small>${degreeLabel(st)}</small></div>`).join('');
+        noteChip(notes[i], degreeLabel(st), i === 0)).join('');
     }
 
     $('#shapePlay').addEventListener('click', () => {

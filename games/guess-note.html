@@ -69,14 +69,14 @@
       $('#board').innerHTML = drawFretboard({ marks: [mark], maxFret: settings.maxFret, heat: settings.heat });
 
       const pcs = settings.natural ? NATURAL_PCS : [...Array(12).keys()];
-      const options = pcs.map(pc => ({ value: pc, label: pcName(pc), sharp: !NATURAL_PCS.includes(pc) }));
+      const options = pcs.map(pc => ({ value: pc, label: pcName(pc), alt: altPcName(pc), sharp: !NATURAL_PCS.includes(pc) }));
       $('#answers').innerHTML = answerButtons(options, game.done ? { correct: g.pc, picked: game.picked } : null);
 
       const fb = $('#feedback');
       if (!game.done) fb.innerHTML = '<span class="hint">Выбери ноту ниже.</span>';
-      else if (game.ok) fb.innerHTML = verdictHtml(true, `${stringName(g.s)}, ${fretName(g.f)} — ${pcName(g.pc)}.`);
+      else if (game.ok) fb.innerHTML = verdictHtml(true, `${stringName(g.s)}, ${fretName(g.f)} — ${pcName(g.pc)}${alt(altPcName(g.pc))}.`);
       else fb.innerHTML = verdictHtml(false,
-        `Это <b>${pcName(g.pc)}</b>, а не ${pcName(game.picked)}.<br><span class="path">${countPath(g.s, g.f)}</span>`, true);
+        `Это <b>${pcName(g.pc)}</b>${alt(altPcName(g.pc))}, а не ${pcName(game.picked)}.<br><span class="path">${countPath(g.s, g.f)}</span>`, true);
     }
 
     function answer(pc) {

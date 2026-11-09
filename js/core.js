@@ -30,7 +30,8 @@ const mod = (n, m) => ((n % m) + m) % m;
 // ---------- settings & storage ----------
 const STORE_KEY = 'grif-noty-v1';
 const DEFAULT_SETTINGS = {
-  notation: 'ru',
+  notation: 'ru',   // main note names: 'ru' (До Ре Ми) or 'en' (C D E)
+  dual: true,       // also show the other naming, smaller, as a learning hint
   sound: true,
   maxFret: 4,
   natural: true,
@@ -112,6 +113,14 @@ function makeNote(letter, acc, octave) {
 }
 
 const noteName = n => letterName(n.letter) + accSymbol(n.acc);
+
+/* The other naming system (English when the main one is Russian and vice versa). */
+const altPcName = pc => (settings.notation === 'ru' ? NAMES_EN : NAMES_RU)[mod(pc, 12)];
+const altLetterName = li => (settings.notation === 'ru' ? LETTERS_EN : LETTERS_RU)[li];
+const altNoteName = n => altLetterName(n.letter) + accSymbol(n.acc);
+
+/** Secondary name as a small cut-paper tag, e.g. "Соль [G]"; empty when "Оба" is off. */
+const alt = text => (settings.dual ? ` <span class="alt">${text}</span>` : '');
 
 /** Parse "c#/4", "bb/3", "e/5" into a spelled note. */
 function parseNote(text) {

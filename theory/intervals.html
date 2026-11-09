@@ -84,21 +84,21 @@
       drawStaff($('#intStaff'), {
         clef: 'treble',
         items: [
-          { notes: [low], label: noteName(low) },
-          { notes: [high], label: noteName(high), color: STAFF_COLORS.accent },
+          { notes: [low], named: true },
+          { notes: [high], named: true, color: STAFF_COLORS.accent },
           { bar: true },
           { notes: [low, high], label: 'вместе' },
         ],
       });
       const [semis] = INTERVALS[state.interval];
-      $('#intCaption').textContent = `${noteName(low)} → ${noteName(high)}: ${INTERVAL_NAMES[semis]}, ${semis} полутон${semis === 1 ? '' : semis > 1 && semis < 5 ? 'а' : 'ов'}`;
+      $('#intCaption').innerHTML = `${noteName(low)} → ${noteName(high)}${alt(`${altNoteName(low)} → ${altNoteName(high)}`)}: ${INTERVAL_NAMES[semis]}, ${semis} полутон${semis === 1 ? '' : semis > 1 && semis < 5 ? 'а' : 'ов'}`;
 
       $('#intTable').innerHTML = '<tr><th>Полутонов</th><th>Интервал</th><th></th><th>Пример</th><th>Звучит</th></tr>' +
         INTERVALS.map(([s, d, short, mood], i) => {
           const [, top] = buildNotes(state.root, [[0, 1], [s, d]]);
           return `<tr class="clickable" data-i="${i}" aria-selected="${i === state.interval}">
             <td>${s}</td><td>${INTERVAL_NAMES[s]}</td><td class="muted">${short}</td>
-            <td>${rootName(state.root, false)} → ${noteName(top)}</td><td class="muted">${mood}</td></tr>`;
+            <td>${rootName(state.root, false)} → ${noteName(top)}${alt(altNoteName(top))}</td><td class="muted">${mood}</td></tr>`;
         }).join('');
     }
 

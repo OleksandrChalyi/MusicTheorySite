@@ -81,10 +81,10 @@
         height: 150,
         top: 10,
         scale: 1.5,
-        items: [{ notes: [note], color, label: game.done ? noteName(note) : undefined }],
+        items: [{ notes: [note], color, named: game.done }],
       });
 
-      const options = LETTERS_EN.map((_, li) => ({ value: li, label: letterName(li) }));
+      const options = LETTERS_EN.map((_, li) => ({ value: li, label: letterName(li), alt: altLetterName(li) }));
       $('#answers').innerHTML = answerButtons(options, game.done ? { correct: note.letter, picked: game.picked } : null);
 
       const spots = guitarSpots(soundingMidi(game.p));
@@ -95,7 +95,7 @@
           : '<span class="hint">Выбери название ноты.</span>';
       } else {
         const where = spots.map(x => `${x.s + 1}-я струна, ${x.f === 0 ? 'открытая' : x.f + ' лад'}`).join(' · ');
-        fb.innerHTML = verdictHtml(game.ok, `Это <b>${noteName(note)}</b> <span class="hint">(${LETTERS_EN[note.letter]}${note.octave} по записи)</span>. На гитаре: ${where}.`, !game.ok);
+        fb.innerHTML = verdictHtml(game.ok, `Это <b>${noteName(note)}</b>${alt(altNoteName(note))} <span class="hint">· ${LETTERS_EN[note.letter]}${note.octave} по записи</span>. На гитаре: ${where}.`, !game.ok);
       }
 
       $('#boardWrap').hidden = !game.done;

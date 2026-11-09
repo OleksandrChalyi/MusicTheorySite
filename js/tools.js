@@ -43,6 +43,12 @@ function renderPills(el, options, current, onPick) {
   };
 }
 
+/** A note card: main name, the other naming smaller under it, and a caption (degree etc.). */
+function noteChip(note, caption, isRoot) {
+  const altName = settings.dual ? `<span class="alt">${altNoteName(note)}</span>` : '';
+  return `<div class="chip${isRoot ? ' root' : ''}"><b>${noteName(note)}</b>${altName}<small>${caption}</small></div>`;
+}
+
 /** Root options C … B, spelled for major or minor. */
 const rootOptions = minor => [...Array(12).keys()].map(pc => ({ value: pc, label: rootName(pc, minor) }));
 

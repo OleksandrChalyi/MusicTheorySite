@@ -80,11 +80,11 @@
       const notes = scaleNotes();
       drawStaff($('#scaleStaff'), {
         clef: 'treble',
-        items: notes.map((n, i) => ({ notes: [n], label: noteName(n), color: i === 0 || i === notes.length - 1 ? STAFF_COLORS.accent : undefined })),
+        items: notes.map((n, i) => ({ notes: [n], named: true, color: i === 0 || i === notes.length - 1 ? STAFF_COLORS.accent : undefined })),
       });
       $('#pattern').textContent = stepPattern(sc.steps);
       $('#degrees').innerHTML = sc.steps.slice(0, -1).map((st, i) =>
-        `<div class="chip${i === 0 ? ' root' : ''}"><b>${noteName(notes[i])}</b><small>ступень ${degreeLabel(st)}</small></div>`).join('');
+        noteChip(notes[i], 'ступень ' + degreeLabel(st), i === 0)).join('');
     }
 
     const play = () => playMelody(scaleNotes().map(n => n.midi), 0.32);

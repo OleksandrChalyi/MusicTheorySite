@@ -95,14 +95,14 @@
       drawStaff($('#chordStaff'), {
         clef: 'treble',
         items: [
-          ...notes.map(n => ({ notes: [n], dur: 'q', label: noteName(n) })),
+          ...notes.map(n => ({ notes: [n], dur: 'q', named: true })),
           { bar: true },
           { notes, label: chordSymbol(), color: STAFF_COLORS.accent },
         ],
       });
       $('#chordCaption').textContent = `${chordSymbol()} — ${ch.formula}`;
       $('#chordNotes').innerHTML = notes.map((n, i) =>
-        `<div class="chip${i === 0 ? ' root' : ''}"><b>${noteName(n)}</b><small>${degreeLabel(ch.steps[i])}</small></div>`).join('');
+        noteChip(n, degreeLabel(ch.steps[i]), i === 0)).join('');
     }
 
     function play() {

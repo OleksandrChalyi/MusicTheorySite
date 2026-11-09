@@ -46,8 +46,10 @@ function drawStaff(el, spec) {
 
   const scale = spec.scale || 1;
   const width = Math.max(240, Math.floor(el.clientWidth || 320));
-  const hasLabels = spec.labels || (spec.items || []).some(i => i.label);
-  const height = ((spec.height || 150) + (hasLabels ? 18 : 0)) * scale;
+  const items0 = spec.items || [];
+  const hasLabels = spec.labels || items0.some(i => i.label || i.named);
+  const hasDual = settings.dual && (spec.labels || items0.some(i => i.named));
+  const height = ((spec.height || 150) + (hasLabels ? 18 : 0) + (hasDual ? 16 : 0)) * scale;
   const renderer = new VF.Renderer(el, VF.Renderer.Backends.SVG);
   renderer.resize(width, height);
   const ctx = renderer.getContext();
@@ -76,6 +78,26 @@ function drawStaff(el, spec) {
 
   VF.Formatter.FormatAndDraw(ctx, stave, tickables);
   beams.forEach(b => b.setContext(ctx).draw());
+  centerLabels(el, tickables);
+}
+
+/**
+ * VexFlow guesses text width from its own font metrics, which are off for Oswald and Cyrillic,
+ * so labels drift sideways. Re-centre every label exactly under its note head.
+ * Labels are drawn as <text> in note order, so we match them in that order.
+ */
+function centerLabels(el, tickables) {
+  const expected = [];
+  tickables.forEach(t => (t._labels || []).forEach(text =>
+    expected.push({ text, x: t.getAbsoluteX() + t.getGlyphWidth() / 2 })));
+  let k = 0;
+  el.querySelectorAll('text').forEach(node => {
+    if (k < expected.length && node.textContent === expected[k].text) {
+      node.setAttribute('x', expected[k].x.toFixed(2));
+      node.setAttribute('text-anchor', 'middle');
+      k++;
+    }
+  });
 }
 
 function makeStaveNote(VF, item, clef, autoLabels) {
@@ -96,16 +118,23 @@ function makeStaveNote(VF, item, clef, autoLabels) {
     });
   }
 
-  let label = item.label;
-  if (label === undefined && autoLabels && !item.rest) label = item.notes.map(noteName).join(' ');
-  if (label && label !== '_') {
-    const ann = new VF.Annotation(label.replace(/_/g, ' '));
-    ann.setFont('Oswald', 13, 'bold');
-    ann.setVerticalJustification(VF.Annotation.VerticalJustify.BOTTOM);
-    note.addModifier(ann, 0);
-  }
+  // Note names under the note: main name, and the other naming smaller below it ("Соль" / "G").
+  const named = !item.rest && (item.named || (item.label === undefined && autoLabels));
+  const main = named ? item.notes.map(noteName).join(' ') : item.label;
+  note._labels = [];
+  if (main && main !== '_') addAnnotation(VF, note, main.replace(/_/g, ' '), 13, 'bold');
+  if (named && settings.dual) addAnnotation(VF, note, item.notes.map(altNoteName).join(' '), 11, 'bold', '#c4441c');
   if (item.color) note.setStyle({ fillStyle: item.color, strokeStyle: item.color });
   return note;
+}
+
+function addAnnotation(VF, note, text, size, weight, color) {
+  const ann = new VF.Annotation(text);
+  ann.setFont('Oswald', size, weight);
+  ann.setVerticalJustification(VF.Annotation.VerticalJustify.BOTTOM);
+  if (color) ann.setStyle({ fillStyle: color, strokeStyle: color });
+  note.addModifier(ann, 0);
+  note._labels.push(text);
 }
 
 // Redraw staffs when their width changes (phone rotation, window resize).
@@ -187,7 +216,10 @@ function drawPiano(opts = {}) {
     const midi = startMidi + Math.floor(i / 7) * 12 + LETTER_PC[letter];
     const x = 1 + i * whiteW;
     whites += `<rect class="white${highlight.has(midi) ? ' hl' : ''}" data-midi="${midi}" x="${x}" y="${top}" width="${whiteW}" height="${whiteH}" rx="4"/>`;
-    if (opts.labels !== false) whites += `<text x="${x + whiteW / 2}" y="${top + whiteH - 12}">${letterName(letter)}</text>`;
+    if (opts.labels !== false) {
+      whites += `<text x="${x + whiteW / 2}" y="${top + whiteH - (settings.dual ? 24 : 12)}">${letterName(letter)}</text>`;
+      if (settings.dual) whites += `<text class="alt-key" x="${x + whiteW / 2}" y="${top + whiteH - 9}">${altLetterName(letter)}</text>`;
+    }
 
     const hasBlack = letter !== 2 && letter !== 6 && i < whiteCount - 1;
     if (hasBlack) {

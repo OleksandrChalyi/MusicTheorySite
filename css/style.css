@@ -444,6 +444,7 @@ tr.clickable[aria-selected="true"] td.muted { color: inherit; opacity: 0.75; }
 .piano .hl { fill: #e0572a; }
 .piano [data-midi]:hover { fill-opacity: 0.85; }
 .piano text { font-family: var(--f-disp); font-size: 13px; font-weight: 700; text-anchor: middle; fill: var(--ink); pointer-events: none; }
+.piano .alt-key { font-size: 11px; font-weight: 700; fill: #c4441c; }
 .piano .step { font-size: 12px; font-weight: 500; letter-spacing: 0.1em; fill: var(--text); }
 
 /* prev / next */
@@ -546,6 +547,9 @@ tr.clickable[aria-selected="true"] td.muted { color: inherit; opacity: 0.75; }
   transition: transform 0.08s, background 0.12s;
 }
 .answer:nth-child(odd) { clip-path: var(--cut3); }
+.answer { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; line-height: 1.1; }
+.answer .alt { margin: 0; font-size: 12px; }
+.answer.right .alt { background: var(--ink); color: var(--cream); }
 .answer:hover:not(:disabled) { background: #2a2420; transform: translateY(-2px); }
 .answer.sharp { color: #b7aa95; }
 .answer.right { background: var(--cream); color: var(--ink); }
@@ -555,6 +559,27 @@ tr.clickable[aria-selected="true"] td.muted { color: inherit; opacity: 0.75; }
 .feedback { min-height: 60px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; }
 .feedback p { margin: 0; max-width: 62ch; }
 .hint { color: var(--muted); font-size: 15px; }
+/* second naming system: a small cut-paper ticket in the page's accent colour */
+.alt {
+  display: inline-block;
+  margin-left: 0.3em;
+  padding: 0 0.4em;
+  font-family: var(--f-disp);
+  font-weight: 500;
+  font-size: 0.72em;
+  line-height: 1.45;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  vertical-align: 0.12em;
+  white-space: nowrap;
+  background: var(--accent);
+  color: var(--on-accent);
+  clip-path: var(--cut3);
+}
+.chip .alt { margin: 3px 0 2px; font-size: 12px; }
+.chip.root .alt, tr.clickable[aria-selected="true"] .alt { background: var(--on-accent); color: var(--accent); }
+:is([data-film="suspects"], [data-film="nxnw"]) .stage .alt { background: var(--ink); color: var(--cream); }
+.question .alt { font-size: 0.42em; vertical-align: 0.5em; }
 .verdict {
   font-family: var(--f-disp); font-weight: 700; font-size: 30px; text-transform: uppercase;
   padding: 2px 20px 4px; transform: rotate(-5deg);

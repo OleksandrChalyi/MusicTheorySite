@@ -59,7 +59,7 @@
 
     function render() {
       const g = game.pos;
-      $('#question').innerHTML = `Найди <mark>${pcName(g.pc)}</mark>`;
+      $('#question').innerHTML = `Найди <mark>${pcName(g.pc)}</mark>${alt(altPcName(g.pc))}`;
       $('#where').textContent = `на ${g.s + 1}-й струне` + (settings.maxFret < 12 ? `, лады 0–${settings.maxFret}` : '');
 
       const marks = [];
@@ -73,9 +73,9 @@
 
       const fb = $('#feedback');
       if (!game.done) fb.innerHTML = `<span class="hint">${game.warn || 'Нажми лад на подсвеченной струне.'}</span>`;
-      else if (game.ok) fb.innerHTML = verdictHtml(true, `${pcName(g.pc)} на ${g.s + 1}-й струне — все места отмечены.`);
+      else if (game.ok) fb.innerHTML = verdictHtml(true, `${pcName(g.pc)}${alt(altPcName(g.pc))} на ${g.s + 1}-й струне — все места отмечены.`);
       else fb.innerHTML = verdictHtml(false,
-        `Там ${pcName(game.clicked.pc)}. Нужная нота отмечена зелёным.<br><span class="path">${countPath(g.s, g.f)}</span>`, true);
+        `Там ${pcName(game.clicked.pc)}${alt(altPcName(game.clicked.pc))}. Нужная нота отмечена зелёным.<br><span class="path">${countPath(g.s, g.f)}</span>`, true);
     }
 
     function clickFret(s, f) {
