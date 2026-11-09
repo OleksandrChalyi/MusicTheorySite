@@ -53,7 +53,7 @@
   <script src="../js/fretboard.js"></script>
   <script src="../js/game.js"></script>
   <script>
-    const game = { pos: null, done: false, ok: false, picked: null, ms: null };
+    const game = { pos: null, done: false, ok: false, picked: null, rec: null };
 
     const session = new Session({
       gameId: 'guess-note',
@@ -61,10 +61,10 @@
       levels: FRET_LEVELS,
       onQuestion(focus) {
         game.pos = nextFretPosition(game.pos, focus);
-        Object.assign(game, { done: false, ok: false, picked: null, ms: null });
+        Object.assign(game, { done: false, ok: false, picked: null, rec: null });
         render();
         pluck(OPEN_STRINGS[game.pos.s] + game.pos.f);
-        session.ask();
+        session.ask(fretKey(game.pos));
       },
     });
 
@@ -82,9 +82,9 @@
 
       const fb = $('#feedback');
       if (!game.done) fb.innerHTML = '<span class="hint">Выбери ноту ниже. Чем быстрее — тем больше очков.</span>';
-      else if (game.ok) fb.innerHTML = verdictHtml(true, `${stringName(g.s)}, ${fretName(g.f)} — ${pcName(g.pc)}${alt(altPcName(g.pc))}.`, false, game.ms);
+      else if (game.ok) fb.innerHTML = verdictHtml(true, `${stringName(g.s)}, ${fretName(g.f)} — ${pcName(g.pc)}${alt(altPcName(g.pc))}.`, false, game.rec);
       else fb.innerHTML = verdictHtml(false,
-        `Это <b>${pcName(g.pc)}</b>${alt(altPcName(g.pc))}, а не ${pcName(game.picked)}.<br><span class="path">${countPath(g.s, g.f)}</span>`, true, game.ms);
+        `Это <b>${pcName(g.pc)}</b>${alt(altPcName(g.pc))}, а не ${pcName(game.picked)}.<br><span class="path">${countPath(g.s, g.f)}</span>`, true, game.rec);
     }
 
     function answer(pc) {
@@ -92,10 +92,10 @@
       const g = game.pos;
       Object.assign(game, { done: true, picked: pc, ok: pc === g.pc });
       recordResult(store.fret, fretKey(g), game.ok);
-      game.ms = session.record({
-        key: fretKey(g), ok: game.ok, given: pcName(pc),
+      game.rec = session.record({
+        key: fretKey(g), name: pcName(g.pc), ok: game.ok, given: pcName(pc),
         label: `${pcName(g.pc)} · ${g.s + 1}-я стр., ${g.f === 0 ? 'открытая' : g.f + ' лад'}`,
-      }).ms;
+      });
       pluck(OPEN_STRINGS[g.s] + g.f);
       render();
       if (game.ok) { const token = g; setTimeout(() => { if (game.pos === token) session.next(); }, 800); }

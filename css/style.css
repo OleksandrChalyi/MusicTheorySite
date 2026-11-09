@@ -678,3 +678,102 @@ tr.clickable[aria-selected="true"] td.muted { color: inherit; opacity: 0.75; }
   .session, .reel, .answer, .pager a { transition: none; }
 }
 [data-film="metropolis"] .credits-tag { background: #d4a64a; color: #0b0906; }
+
+/* ---------- session feedback: rounds strip, streak, note mastery ---------- */
+.rounds { display: flex; flex-direction: column; gap: 6px; }
+.rounds-label { display: flex; align-items: baseline; gap: 12px; font-family: var(--f-disp); text-transform: uppercase; letter-spacing: 0.14em; font-size: 13px; }
+.rounds-label b { font-weight: 500; }
+.rounds-label span { color: var(--muted); font-size: 11px; }
+.rounds-bar { display: grid; grid-template-columns: repeat(20, 1fr); gap: 3px; }
+.seg-r { height: 10px; background: color-mix(in srgb, var(--text) 14%, transparent); transition: background 0.2s; }
+.seg-r.fast { background: #1f8f6c; }
+.seg-r.slow { background: #d9a03a; }
+.seg-r.wrong { background: #c8261d; }
+.seg-r.current { background: var(--text); animation: segPulse 1.1s ease-in-out infinite; }
+@keyframes segPulse { 50% { opacity: 0.35; } }
+.session-start .rounds-bar .seg-r { animation: segIn 0.4s var(--d, 0s) both; }
+@keyframes segIn { from { transform: scaleY(0); } }
+
+/* streak in the score bar */
+.stat.streak small em { font-style: normal; font-weight: 700; color: var(--ink); background: #e0572a; padding: 0 4px; margin-left: 2px; }
+.stat.streak.hot { background: #e0572a; color: var(--ink); }
+.stat.streak.hot small em { background: var(--ink); color: #e0572a; }
+.stat.streak.bump b { animation: bump 0.3s cubic-bezier(.3, 1.8, .5, 1); }
+.stat.streak.milestone b { animation: milestone 0.7s cubic-bezier(.3, 1.6, .5, 1); }
+.stat.streak.broken { animation: shake 0.35s; }
+@keyframes bump { from { transform: scale(1.5); } }
+@keyframes milestone { 0% { transform: scale(2.2) rotate(-12deg); } 60% { transform: scale(0.9) rotate(4deg); } }
+@keyframes shake { 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
+
+/* the note's three pips right after an answer */
+.mastery-pips { display: inline-flex; align-items: center; gap: 8px; font-family: var(--f-disp); }
+.mastery-pips b { font-size: 18px; }
+.mastery-pips em { font-style: normal; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.8; }
+.mastery-pips .learned-now { opacity: 1; background: #1f8f6c; color: #fff; padding: 2px 8px; clip-path: var(--cut2); animation: stamp 0.35s cubic-bezier(.2, 1.6, .5, 1); }
+.mastery-pips .reset { color: #c8261d; opacity: 1; }
+.pips { display: inline-flex; gap: 4px; }
+.pips i { width: 12px; height: 12px; border: 2px solid currentColor; border-radius: 50%; opacity: 0.45; }
+.pips i.on { background: #1f8f6c; border-color: #1f8f6c; opacity: 1; }
+.pips i.new { animation: pipIn 0.45s cubic-bezier(.3, 1.8, .5, 1); }
+.pips i.lost { border-color: #c8261d; opacity: 1; animation: pipLost 0.6s both; }
+@keyframes pipIn { from { transform: scale(2.4); } }
+@keyframes pipLost { 0% { background: #c8261d; transform: scale(1.3); } 100% { background: transparent; transform: scale(1); } }
+.mastery-pips.burst .pips i.on { animation: pipBurst 0.6s cubic-bezier(.3, 1.8, .5, 1) both; }
+.mastery-pips.burst .pips i:nth-child(2) { animation-delay: 0.08s; }
+.mastery-pips.burst .pips i:nth-child(3) { animation-delay: 0.16s; }
+@keyframes pipBurst { 0% { transform: scale(1); } 40% { transform: scale(1.8); box-shadow: 0 0 0 6px rgba(31, 143, 108, 0.25); } 100% { transform: scale(1); } }
+
+/* map of all notes in the level */
+.mastery-map { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 8px; }
+.map-chip {
+  display: inline-flex; flex-direction: column; align-items: center; min-width: 48px; padding: 4px 6px 5px;
+  background: color-mix(in srgb, var(--text) 7%, transparent); clip-path: var(--cut3); line-height: 1.1;
+}
+.map-chip b { font-family: var(--f-disp); font-size: 15px; }
+.map-chip small { font-size: 10px; color: var(--muted); letter-spacing: 0.04em; margin: 1px 0 3px; }
+.map-chip .pips { gap: 3px; }
+.map-chip .pips i { width: 7px; height: 7px; border-width: 1.5px; }
+.map-chip.learned { background: #1f8f6c; color: #fff; }
+.map-chip.learned small { color: rgba(255, 255, 255, 0.75); }
+.map-chip.learned .pips i { border-color: #fff; background: #fff; }
+.map-chip.current { outline: 2px solid var(--accent); outline-offset: -2px; }
+.map-chip.flash { animation: chipFlash 0.6s; }
+@keyframes chipFlash { 0% { transform: scale(1.25); } }
+.mastery-text b.pulse { animation: bump 0.4s; }
+
+@media (max-width: 600px) {
+  .rounds-bar { gap: 2px; }
+  .map-chip { min-width: 42px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .seg-r.current, .session-start .rounds-bar .seg-r, .stat.streak b, .stat.streak.broken, .pips i, .map-chip.flash, .mastery-pips .learned-now { animation: none !important; }
+}
+
+/* results: chart + dark "notes of this session" box */
+.credits-bottom { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 18px; align-items: start; }
+.session-notes { background: var(--ink); color: var(--cream); padding: 16px 18px; clip-path: var(--cut1); }
+.session-notes h3 { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; color: var(--cream); }
+.session-notes h3 span { font-size: 12px; letter-spacing: 0.1em; color: #b7aa95; }
+.session-notes ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; max-height: 300px; overflow-y: auto; }
+.session-notes li {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto auto minmax(0, 1.3fr); align-items: center; gap: 10px;
+  padding: 5px 0; border-bottom: 1px solid rgba(241, 230, 207, 0.12); font-size: 14px;
+}
+.session-notes li:last-child { border-bottom: 0; }
+.session-notes .nm b { font-family: var(--f-disp); font-size: 17px; margin-right: 6px; }
+.session-notes .nm small { color: #b7aa95; font-size: 11px; }
+.session-notes .hit { font-family: var(--f-disp); color: #b7aa95; }
+.session-notes .pips i { width: 10px; height: 10px; border-color: #b7aa95; opacity: 1; }
+.session-notes .pips i.on { background: #3fb88f; border-color: #3fb88f; }
+.session-notes em { font-style: normal; font-size: 12px; color: #e0a46a; text-align: right; }
+.session-notes em.ok { color: #3fb88f; font-family: var(--f-disp); text-transform: uppercase; letter-spacing: 0.08em; }
+.sn-hint { margin: 10px 0 0; font-size: 12px; color: #b7aa95; line-height: 1.4; }
+
+.credits-actions { align-items: flex-start; }
+.credits-actions .action { display: flex; flex-direction: column; align-items: center; gap: 6px; max-width: 280px; text-align: center; }
+.credits-actions .action small { font-size: 12px; color: var(--muted); line-height: 1.35; }
+.mode-tag { background: var(--ink); color: var(--cream); padding: 1px 8px; letter-spacing: 0.08em; font-size: 11px; clip-path: var(--cut2); }
+[data-film="metropolis"] .mode-tag { background: #d4a64a; color: #0b0906; }
+[data-film="metropolis"] .session-notes { background: #0b0906; outline: 1px solid #d4a64a; outline-offset: -1px; }
+
+@media (max-width: 700px) { .credits-bottom { grid-template-columns: 1fr; } }

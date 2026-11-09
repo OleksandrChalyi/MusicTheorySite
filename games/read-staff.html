@@ -60,7 +60,7 @@
     // A note is stored as a diatonic position p: letter = p % 7, octave = floor(p / 7).
     // Written range: "staff" D4..G5 (on the five lines), "full" E3..B5 (whole neck up to the 12th fret).
     const RANGES = { staff: [29, 39], full: [23, 41] };
-    const game = { p: null, done: false, ok: false, picked: null, hint: false, ms: null };
+    const game = { p: null, done: false, ok: false, picked: null, hint: false, rec: null };
 
     const writtenNote = p => makeNote(p % 7, 0, Math.floor(p / 7));
     const soundingMidi = p => writtenNote(p).midi - 12;
@@ -74,15 +74,16 @@
         values: ['staff', 'full'],
         label: v => (v === 'staff' ? 'ноты на линейках' : 'весь гриф с добавочными линейками'),
         keysFor: v => positions(v).map(String),
+        keyLabel: key => { const n = writtenNote(Number(key)); return { name: noteName(n), sub: LETTERS_EN[n.letter] + n.octave }; },
       },
       onQuestion(focus) {
         let cands = positions(settings.staffRange);
         if (focus) { const f = cands.filter(p => focus.has(String(p))); if (f.length) cands = f; }
         if (game.p !== null && cands.length > 1) cands = cands.filter(p => p !== game.p);
         game.p = weightedPick(cands, p => itemWeight(store.staff[p]));
-        Object.assign(game, { done: false, ok: false, picked: null, hint: false, ms: null });
+        Object.assign(game, { done: false, ok: false, picked: null, hint: false, rec: null });
         render();
-        session.ask();
+        session.ask(String(game.p));
       },
     });
 
@@ -108,7 +109,7 @@
           : '<span class="hint">Выбери название ноты. Чем быстрее — тем больше очков.</span>';
       } else {
         const where = spots.map(x => `${x.s + 1}-я струна, ${x.f === 0 ? 'открытая' : x.f + ' лад'}`).join(' · ');
-        fb.innerHTML = verdictHtml(game.ok, `Это <b>${noteName(note)}</b>${alt(altNoteName(note))} <span class="hint">· ${LETTERS_EN[note.letter]}${note.octave} по записи</span>. На гитаре: ${where}.`, !game.ok, game.ms);
+        fb.innerHTML = verdictHtml(game.ok, `Это <b>${noteName(note)}</b>${alt(altNoteName(note))} <span class="hint">· ${LETTERS_EN[note.letter]}${note.octave} по записи</span>. На гитаре: ${where}.`, !game.ok, game.rec);
       }
 
       $('#boardWrap').hidden = !game.done;
@@ -122,10 +123,10 @@
       const note = writtenNote(game.p);
       Object.assign(game, { done: true, picked: li, ok: li === note.letter });
       recordResult(store.staff, game.p, game.ok);
-      game.ms = session.record({
-        key: String(game.p), ok: game.ok, given: letterName(li),
+      game.rec = session.record({
+        key: String(game.p), name: noteName(note), ok: game.ok, given: letterName(li),
         label: `${noteName(note)} · ${LETTERS_EN[note.letter]}${note.octave}`,
-      }).ms;
+      });
       pluck(soundingMidi(game.p));
       render();
       if (game.ok) { const token = game.p; setTimeout(() => { if (game.p === token && game.done) session.next(); }, 1100); }

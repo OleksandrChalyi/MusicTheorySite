@@ -51,7 +51,7 @@
   <script src="../js/fretboard.js"></script>
   <script src="../js/game.js"></script>
   <script>
-    const game = { pos: null, done: false, ok: false, clicked: null, warn: '', ms: null };
+    const game = { pos: null, done: false, ok: false, clicked: null, warn: '', rec: null };
 
     const session = new Session({
       gameId: 'find-note',
@@ -59,9 +59,9 @@
       levels: FRET_LEVELS,
       onQuestion(focus) {
         game.pos = nextFretPosition(game.pos, focus);
-        Object.assign(game, { done: false, ok: false, clicked: null, warn: '', ms: null });
+        Object.assign(game, { done: false, ok: false, clicked: null, warn: '', rec: null });
         render();
-        session.ask();
+        session.ask(fretKey(game.pos));
       },
     });
 
@@ -81,9 +81,9 @@
 
       const fb = $('#feedback');
       if (!game.done) fb.innerHTML = `<span class="hint">${game.warn || 'Нажми лад на подсвеченной струне. Чем быстрее — тем больше очков.'}</span>`;
-      else if (game.ok) fb.innerHTML = verdictHtml(true, `${pcName(g.pc)}${alt(altPcName(g.pc))} на ${g.s + 1}-й струне — все места отмечены.`, false, game.ms);
+      else if (game.ok) fb.innerHTML = verdictHtml(true, `${pcName(g.pc)}${alt(altPcName(g.pc))} на ${g.s + 1}-й струне — все места отмечены.`, false, game.rec);
       else fb.innerHTML = verdictHtml(false,
-        `Там ${pcName(game.clicked.pc)}${alt(altPcName(game.clicked.pc))}. Нужная нота отмечена зелёным.<br><span class="path">${countPath(g.s, g.f)}</span>`, true, game.ms);
+        `Там ${pcName(game.clicked.pc)}${alt(altPcName(game.clicked.pc))}. Нужная нота отмечена зелёным.<br><span class="path">${countPath(g.s, g.f)}</span>`, true, game.rec);
     }
 
     function clickFret(s, f) {
@@ -98,10 +98,10 @@
       const pc = (OPEN_STRINGS[s] + f) % 12;
       Object.assign(game, { done: true, ok: pc === g.pc, clicked: { s, f, pc } });
       recordResult(store.fret, fretKey(g), game.ok);
-      game.ms = session.record({
-        key: fretKey(g), ok: game.ok, given: `${pcName(pc)}, ${f === 0 ? 'открытая' : f + ' лад'}`,
+      game.rec = session.record({
+        key: fretKey(g), name: pcName(g.pc), ok: game.ok, given: `${pcName(pc)}, ${f === 0 ? 'открытая' : f + ' лад'}`,
         label: `${pcName(g.pc)} · ${g.s + 1}-я струна`,
-      }).ms;
+      });
       render();
       if (game.ok) { const token = g; setTimeout(() => { if (game.pos === token) session.next(); }, 900); }
     }
